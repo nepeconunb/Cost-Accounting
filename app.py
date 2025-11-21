@@ -12,7 +12,7 @@ st.title("LABCOST – Simulador de Custos")
 
 st.write("""
 O **LABCOST** é uma ferramenta educacional que auxilia estudantes e gestores a compreenderem  
-**comportamento dos custos, margem de contribuição, ponto de equilíbrio e alavancagem operacional**.  
+**comportamento dos gastos, margem de contribuição, ponto de equilíbrio e alavancagem operacional**.  
 Use os controles da barra lateral para simular diferentes cenários.
 """)
 
@@ -20,8 +20,8 @@ Use os controles da barra lateral para simular diferentes cenários.
 st.sidebar.header("Configurações da Simulação")
 
 preco = st.sidebar.number_input("Preço de venda por unidade (R$)", 0.0, 10000.0, 100.0)
-custo_var = st.sidebar.number_input("Custo variável por unidade (R$)", 0.0, 10000.0, 30.0)
-custos_fixos = st.sidebar.number_input("Custos fixos totais (R$)", 0.0, 1000000.0, 25000.0)
+gasto_var = st.sidebar.number_input("Gasto variável por unidade (R$)", 0.0, 10000.0, 30.0)
+gastos_fixos = st.sidebar.number_input("Gastos fixos totais (R$)", 0.0, 1000000.0, 25000.0)
 quantidade = st.sidebar.number_input("Volume de vendas esperado (unidades)", 0, 1000000, 1000)
 
 st.sidebar.markdown("---")
@@ -31,21 +31,21 @@ q_max = st.sidebar.number_input("Volume máximo (gráfico)", 0, 1000000, 2000)
 q_step = st.sidebar.number_input("Incremento (gráfico)", 1, 1000000, 100)
 
 # ----- CÁLCULOS -----
-mc_unit = preco - custo_var
+mc_unit = preco - gasto_var
 mc_total = mc_unit * quantidade
 receita_total = preco * quantidade
-custo_var_total = custo_var * quantidade
-lucro = mc_total - custos_fixos
+gasto_var_total = gasto_var * quantidade
+lucro = mc_total - gastos_fixos
 
 if mc_unit != 0:
-    pe_unidades = custos_fixos / mc_unit
+    pe_unidades = gastos_fixos / mc_unit
     pe_receita = pe_unidades * preco
 else:
     pe_unidades = 0
     pe_receita = 0
 
-if mc_total - custos_fixos != 0:
-    gao = mc_total / (mc_total - custos_fixos)
+if mc_total - gastos_fixos != 0:
+    gao = mc_total / (mc_total - gastos_fixos)
 else:
     gao = 0
 
@@ -69,7 +69,7 @@ with col2:
 # LUCRATIVIDADE
 st.subheader("Lucratividade")
 st.write(f"Receita total: **R$ {receita_total:,.2f}**")
-st.write(f"Custo variável total: **R$ {custo_var_total:,.2f}**")
+st.write(f"Custo variável total: **R$ {gasto_var_total:,.2f}**")
 st.write(f"Lucro operacional: **R$ {lucro:,.2f}**")
 
 # GAO
@@ -91,8 +91,8 @@ if q_max > q_min:
     df = pd.DataFrame({
         "Volume": volumes,
         "Receita": [preco * q for q in volumes],
-        "Custo Variável": [custo_var * q for q in volumes],
-        "Lucro": [(preco - custo_var) * q - custos_fixos for q in volumes]
+        "Gasto Variável": [gasto_var * q for q in volumes],
+        "Lucro": [(preco - gasto_var) * q - gastos_fixos for q in volumes]
     }).set_index("Volume")
 
     st.subheader("Comportamento do Lucro por Volume de Vendas")
