@@ -1,85 +1,101 @@
 import streamlit as st
 import pandas as pd
 
+# ----- CONFIGURAÇÃO DA PÁGINA -----
 st.set_page_config(
-    page_title="LABCOST – Learning and Business Cost Simulator",
+    page_title="LABCOST – Simulador de Custos",
     layout="centered"
 )
 
-st.title("LABCOST – Learning and Business Cost Simulator")
+# ----- TÍTULO -----
+st.title("LABCOST – Simulador de Custos")
 
 st.write("""
-**LABCOST** is an educational tool to help students and managers understand  
-**cost behavior, contribution margin, break-even analysis, and operating leverage.**
-Use the sidebar inputs to simulate different scenarios.
+O **LABCOST** é uma ferramenta educacional que auxilia estudantes e gestores a compreenderem  
+**comportamento dos custos, margem de contribuição, ponto de equilíbrio e alavancagem operacional**.  
+Use os controles da barra lateral para simular diferentes cenários.
 """)
 
-# SIDEBAR INPUTS
-st.sidebar.header("Simulation Settings")
+# ----- BARRA LATERAL -----
+st.sidebar.header("Configurações da Simulação")
 
-price = st.sidebar.number_input("Selling price per unit (R$)", 0.0, 10000.0, 100.0)
-variable_cost = st.sidebar.number_input("Variable cost per unit (R$)", 0.0, 10000.0, 30.0)
-fixed_costs = st.sidebar.number_input("Total fixed costs (R$)", 0.0, 1000000.0, 25000.0)
-quantity = st.sidebar.number_input("Expected sales volume (units)", 0, 1000000, 1000)
+preco = st.sidebar.number_input("Preço de venda por unidade (R$)", 0.0, 10000.0, 100.0)
+custo_var = st.sidebar.number_input("Custo variável por unidade (R$)", 0.0, 10000.0, 30.0)
+custos_fixos = st.sidebar.number_input("Custos fixos totais (R$)", 0.0, 1000000.0, 25000.0)
+quantidade = st.sidebar.number_input("Volume de vendas esperado (unidades)", 0, 1000000, 1000)
 
-q_min = st.sidebar.number_input("Min volume (chart)", 0, 1000000, 0)
-q_max = st.sidebar.number_input("Max volume (chart)", 0, 1000000, 2000)
-q_step = st.sidebar.number_input("Step", 1, 1000000, 100)
+st.sidebar.markdown("---")
 
-# BASIC CALCULATIONS
-cm_unit = price - variable_cost
-total_cm = cm_unit * quantity
-total_revenue = price * quantity
-total_var_cost = variable_cost * quantity
-profit = total_cm - fixed_costs
+q_min = st.sidebar.number_input("Volume mínimo (gráfico)", 0, 1000000, 0)
+q_max = st.sidebar.number_input("Volume máximo (gráfico)", 0, 1000000, 2000)
+q_step = st.sidebar.number_input("Incremento (gráfico)", 1, 1000000, 100)
 
-# BREAK-EVEN
-if cm_unit != 0:
-    break_even_units = fixed_costs / cm_unit
-    break_even_revenue = break_even_units * price
+# ----- CÁLCULOS -----
+mc_unit = preco - custo_var
+mc_total = mc_unit * quantidade
+receita_total = preco * quantidade
+custo_var_total = custo_var * quantidade
+lucro = mc_total - custos_fixos
+
+if mc_unit != 0:
+    pe_unidades = custos_fixos / mc_unit
+    pe_receita = pe_unidades * preco
 else:
-    break_even_units = 0
-    break_even_revenue = 0
+    pe_unidades = 0
+    pe_receita = 0
 
-# DOL
-if total_cm - fixed_costs != 0:
-    dol = total_cm / (total_cm - fixed_costs)
+if mc_total - custos_fixos != 0:
+    gao = mc_total / (mc_total - custos_fixos)
 else:
-    dol = 0
+    gao = 0
 
-# RESULTS
-st.header("Key Results")
+# ----- RESULTADOS -----
+st.header("Resultados da Simulação")
+
 col1, col2 = st.columns(2)
 
+# MARGEM DE CONTRIBUIÇÃO
 with col1:
-    st.subheader("Contribution Margin")
-    st.write(f"Unit CM: **R$ {cm_unit:,.2f}**")
-    st.write(f"Total CM: **R$ {total_cm:,.2f}**")
+    st.subheader("Margem de Contribuição")
+    st.write(f"Margem unitária: **R$ {mc_unit:,.2f}**")
+    st.write(f"Margem total: **R$ {mc_total:,.2f}**")
 
+# PONTO DE EQUILÍBRIO
 with col2:
-    st.subheader("Break-even Point")
-    st.write(f"Units: **{break_even_units:,.0f}**")
-    st.write(f"Revenue: **R$ {break_even_revenue:,.2f}**")
+    st.subheader("Ponto de Equilíbrio")
+    st.write(f"Unidades: **{pe_unidades:,.0f}**")
+    st.write(f"Receita necessária: **R$ {pe_receita:,.2f}**")
 
-st.subheader("Profitability")
-st.write(f"Total revenue: **R$ {total_revenue:,.2f}**")
-st.write(f"Total variable costs: **R$ {total_var_cost:,.2f}**")
-st.write(f"Profit (Operating income): **R$ {profit:,.2f}**")
+# LUCRATIVIDADE
+st.subheader("Lucratividade")
+st.write(f"Receita total: **R$ {receita_total:,.2f}**")
+st.write(f"Custo variável total: **R$ {custo_var_total:,.2f}**")
+st.write(f"Lucro operacional: **R$ {lucro:,.2f}**")
 
-st.subheader("Degree of Operating Leverage (DOL)")
-st.write(f"DOL: **{dol:,.2f}**")
+# GAO
+st.subheader("Grau de Alavancagem Operacional (GAO)")
+st.write(f"GAO: **{gao:,.2f}**")
 
-# CHART
+if gao > 0 and gao < 2:
+    st.info("GAO baixo: o lucro é pouco sensível às variações no volume de vendas.")
+elif 2 <= gao < 5:
+    st.warning("GAO moderado: há risco moderado e bom potencial de retorno.")
+elif gao >= 5:
+    st.error("GAO alto: o lucro é muito sensível às variações no volume de vendas.")
+else:
+    st.write("GAO não definido para este cenário.")
+
+# ----- GRÁFICO -----
 if q_max > q_min:
     volumes = list(range(q_min, q_max + 1, q_step))
     df = pd.DataFrame({
         "Volume": volumes,
-        "Revenue": [price * q for q in volumes],
-        "Variable Cost": [variable_cost * q for q in volumes],
-        "Profit": [(price - variable_cost) * q - fixed_costs for q in volumes]
+        "Receita": [preco * q for q in volumes],
+        "Custo Variável": [custo_var * q for q in volumes],
+        "Lucro": [(preco - custo_var) * q - custos_fixos for q in volumes]
     }).set_index("Volume")
 
-    st.subheader("Profit by Sales Volume")
+    st.subheader("Comportamento do Lucro por Volume de Vendas")
     st.line_chart(df)
 
-st.caption("LABCOST – Educational use only.")
+st.caption("LABCOST – Uso educacional.")
