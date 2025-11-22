@@ -57,5 +57,42 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diversos 
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
+### 2. Instalar dependências
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+
+---
+
+# ❌ **NÃO cole essa versão solta**, porque fica fora do formato:
+
+
+❌ ERRADO — aparece bagunçado  
+❌ não fica com cor de código  
+❌ o GitHub não interpreta como bloco técnico
+
+---
+
+# 🎯 Onde exatamente colocar no README?
+
+Dentro desta seção:
+
+
+Logo depois do passo **1**.
+
+Assim:
+
+```md
+# 🔧 Instalação e Execução Local (PT-BR)
+
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/SEU-USUARIO/labcost.git
+cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+
 
 
