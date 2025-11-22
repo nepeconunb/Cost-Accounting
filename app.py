@@ -1,3 +1,6 @@
+tab_simulador, tab_classificacao = st.tabs(
+    ["💻 Simulador de Gastos e Custos", "📚 Classificação de Gastos"]
+)
 import streamlit as st
 import pandas as pd
 
