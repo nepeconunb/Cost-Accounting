@@ -1,85 +1,71 @@
-# LABCOST – Learning and Business Cost Simulator
-
-LABCOST is an interactive **web-based simulator** designed to support teaching and learning in:
-
-- **Cost Accounting**  
-- **Managerial Accounting / Controllership**  
-- **Financial Decision-Making**  
-- **Business Simulation and Pricing**  
-
-The simulator provides an intuitive and visual environment where students and managers can explore how **costs, volume, and profit interact** in real-world business scenarios.
+# 🧮 LABCOST – Simulador de Gastos e Custos  
+### *Learning and Business Cost Simulator*
 
 ---
 
-## 🎯 **Main Features**
+# 🇧🇷 VERSÃO EM PORTUGUÊS
 
-### 🧮 **Single Product Simulation**
-- Unit Contribution Margin  
-- Total Contribution Margin  
-- Break-even point (units and revenue)  
-- Operating Income (Profit or Loss)  
-- Safety Margin (units, revenue, %)  
-- Degree of Operating Leverage (DOL)  
-- Revenue, Variable Costs, Fixed Costs, Profit lines  
-- Unit Cost behavior:
-  - Variable Cost per Unit  
-  - Fixed Cost per Unit  
-  - Total Cost per Unit
+## 📘 Sobre o LABCOST
 
-### 📊 **Product Mix Simulation**
-- Contribution margin per product  
-- Sales mix calculation  
-- Weighted average contribution margin  
-- Break-even point for the mix  
-- Contribution distribution by product  
-- Consolidated operating income  
+O **LABCOST** é um simulador interativo desenvolvido para apoiar o ensino e a aprendizagem em:
 
-### 📚 **Cost Classification Training**
-Interactive exercise for students to classify:
-- Cost vs. Expense  
-- Direct / Indirect  
-- Fixed / Variable  
-- Administrative / Selling / Financial  
+- **Contabilidade de Custos**
+- **Contabilidade Gerencial / Controladoria**
+- **Tomada de Decisão**
+- **Simulação de Negócios e Formação de Preços**
 
-Includes automatic scoring and feedback.
+A ferramenta permite que estudantes e gestores analisem de forma visual e dinâmica como **custos, volume e lucro** se comportam em diferentes cenários.
 
 ---
 
-## 🏠 **Home Page**
-The simulator includes a homepage with:
+## 🎯 Funcionalidades Principais
+
+### 🧮 Simulação de Produto Único
+- Margem de contribuição unitária  
+- Margem de contribuição total  
+- Ponto de equilíbrio (unidades e receita)  
+- Lucro/Prejuízo operacional  
+- Margem de segurança (unidades, receita, %)  
+- Grau de Alavancagem Operacional (GAO)  
+- Gráficos de Receita, Gastos Variáveis, Gastos Fixos e Lucro  
+- Análise de gastos unitários:
+  - Gasto variável unitário  
+  - Gasto fixo unitário  
+  - Gasto total unitário  
+
+### 📊 Simulação de Mix de Produtos
+- Margem de contribuição por produto  
+- Cálculo do mix de vendas (%)  
+- Margem de contribuição média ponderada  
+- Ponto de equilíbrio do mix  
+- Distribuição da margem por produto  
+- Lucro operacional consolidado  
+
+### 📚 Treinamento de Classificação de Gastos
+Atividade prática para classificar:
+
+- Custo vs. Despesa  
+- Direto / Indireto  
+- Fixo / Variável  
+- Administrativa / Comercial / Financeira  
+
+Com correção automática e feedback.
+
+---
+
+## 🏠 Página Inicial
+
+A página inicial do LABCOST inclui:
+
 - Logo  
-- Introduction to cost accounting concepts  
-- Teaching suggestions  
-- How to use the simulator in class  
+- Introdução aos conceitos de custos  
+- Sugestões didáticas  
+- Orientações de uso em sala de aula  
 
 ---
 
-## 🖼️ **Interface Preview**
+## 🖼️ Capturas de Tela
 
-> *(Add your screenshots here)*  
-Example:  
-<img src="images/labcost_preview1.png" width="600">
-<img src="images/labcost_preview2.png" width="600">
+> *(Adicione suas imagens reais depois)*
 
----
-
-## 🔧 Installation and Running LABCOST Locally
-
-### 1. Clone this repository
-
-```bash
-git clone https://github.com/SEU-USUARIO/labcost.git
-cd labcost
-pip install -r requirements.txt
-streamlit run app.py
-http://localhost:8501
-labcost/
-│
-├── app.py
-├── requirements.txt
-├── labcost_logo.svg
-├── README.md
-└── images/
-    ├── labcost_preview1.png
-    ├── labcost_preview2.png
 
