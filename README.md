@@ -25,26 +25,35 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diferente
 - Lucro ou prejuízo operacional  
 - Margem de segurança  
 - Grau de alavancagem operacional (GAO)  
-- Gráficos gerenciais (Receita, GV, GF, Lucro)  
-- Custos unitários (GV, GF, Total)  
+- Gráficos gerenciais (Receita, Gastos Variáveis, Gastos Fixos, Lucro)  
+- Custos unitários:
+  - Gasto variável unitário  
+  - Gasto fixo unitário  
+  - Gasto total unitário  
 
 ### 📊 Mix de Produtos
 - Margem de contribuição por produto  
 - Mix de vendas (%)  
-- MC ponderada  
+- Margem de contribuição média ponderada  
 - Ponto de equilíbrio do mix  
-- Lucro consolidado  
+- Distribuição da margem  
+- Lucro operacional consolidado  
 
 ### 📚 Classificação de Gastos
+Atividade interativa para classificar:
+
 - Custo × Despesa  
 - Direto × Indireto  
 - Fixo × Variável  
 - Administrativa / Comercial / Financeira  
-- Com correção automática  
+
+Inclui **correção automática** e feedback imediato.
 
 ---
 
-## 🖼️ Capturas de Tela
+## 🖼️ Capturas de Tela  
+*(adicione as imagens na pasta `/images`)*
+
 <img src="images/labcost_preview1.png" width="600">  
 <img src="images/labcost_preview2.png" width="600">
 
@@ -56,5 +65,4 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diferente
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
-
 
