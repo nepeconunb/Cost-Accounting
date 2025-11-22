@@ -56,5 +56,13 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diferente
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+git clone https://github.com/YOUR-USER/labcost.git
+cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
 
 
