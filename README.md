@@ -58,4 +58,28 @@ The simulator includes a homepage with:
 
 > *(Add your screenshots here)*  
 Example:  
+<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview2.png" width="600">
+
+---
+
+## 🔧 Installation and Running LABCOST Locally
+
+### 1. Clone this repository
+
+```bash
+git clone https://github.com/SEU-USUARIO/labcost.git
+cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+labcost/
+│
+├── app.py
+├── requirements.txt
+├── labcost_logo.svg
+├── README.md
+└── images/
+    ├── labcost_preview1.png
+    ├── labcost_preview2.png
 
