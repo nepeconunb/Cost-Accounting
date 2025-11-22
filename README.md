@@ -64,13 +64,12 @@ A página inicial do LABCOST inclui:
 
 ---
 
-## 🖼️ Capturas de Tela
-
+## 🖼️ Capturas de Tela  
 *(Adicione suas imagens reais depois)*
 
-```html
 <img src="images/labcost_preview1.png" width="600">
 <img src="images/labcost_preview2.png" width="600">
+
 ---
 
 # 🇺🇸 ENGLISH VERSION
@@ -127,11 +126,9 @@ Includes **automatic scoring and real-time feedback**.
 
 ---
 
-## 🖼️ Interface Preview
-
+## 🖼️ Interface Preview  
 *(Add your screenshots later)*
 
-```html
 <img src="images/labcost_preview1.png" width="600">
 <img src="images/labcost_preview2.png" width="600">
 
