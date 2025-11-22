@@ -62,14 +62,13 @@ with tab_simulador:
         q_max = st.sidebar.number_input("Volume máximo (gráfico)", 0, 1000000, 2000)
         q_step = st.sidebar.number_input("Incremento (gráfico)", 1, 1000000, 100)
 
-        # ---------------- CÁLCULOS PRINCIPAIS ----------------
+        # Cálculos
         mc_unit = preco - gasto_var
         mc_total = mc_unit * quantidade
         receita_total = preco * quantidade
         gasto_var_total = gasto_var * quantidade
         lucro = mc_total - gastos_fixos
 
-        # Ponto de equilíbrio
         if mc_unit != 0:
             pe_unidades = gastos_fixos / mc_unit
             pe_receita = pe_unidades * preco
@@ -77,13 +76,12 @@ with tab_simulador:
             pe_unidades = 0
             pe_receita = 0
 
-        # Grau de alavancagem operacional (GAO)
         if mc_total - gastos_fixos != 0:
             gao = mc_total / (mc_total - gastos_fixos)
         else:
             gao = 0
 
-        # Margem de segurança
+        # >>> MARGEM DE SEGURANÇA <<<
         margem_seg_unid = quantidade - pe_unidades
         margem_seg_receita = receita_total - pe_receita
         if quantidade > 0:
@@ -91,7 +89,7 @@ with tab_simulador:
         else:
             margem_seg_perc = 0
 
-        # ---------------- RESULTADOS ----------------
+        # Resultados
         st.header("Resultados da Simulação – Produto único")
 
         col1, col2 = st.columns(2)
@@ -103,4 +101,420 @@ with tab_simulador:
 
         with col2:
             st.subheader("Ponto de Equilíbrio")
+            st.write(f"Unidades: **{pe_unidades:,.0f}**")
+            st.write(f"Receita necessária: **R$ {pe_receita:,.2f}**")
 
+        st.subheader("Lucratividade")
+        st.write(f"Receita total: **R$ {receita_total:,.2f}**")
+        st.write(f"Gasto variável total: **R$ {gasto_var_total:,.2f}**")
+        st.write(f"Gastos fixos totais: **R$ {gastos_fixos:,.2f}**")
+        st.write(f"Lucro operacional: **R$ {lucro:,.2f}**")
+
+        # Exibição da margem de segurança
+        st.subheader("Margem de Segurança")
+        st.write(f"Em unidades: **{margem_seg_unid:,.0f}**")
+        st.write(f"Em receita: **R$ {margem_seg_receita:,.2f}**")
+        st.write(
+            f"Em percentual sobre o volume esperado: **{margem_seg_perc:,.1f}%**"
+        )
+
+        if margem_seg_unid > 0:
+            st.success(
+                "O volume esperado está **acima** do ponto de equilíbrio, "
+                f"com margem de segurança de {margem_seg_perc:,.1f}%."
+            )
+        elif margem_seg_unid < 0:
+            st.error(
+                "O volume esperado está **abaixo** do ponto de equilíbrio, "
+                f"faltando {-margem_seg_unid:,.0f} unidades "
+                f"({-margem_seg_perc:,.1f}%) para atingir o ponto de equilíbrio."
+            )
+        else:
+            st.info(
+                "O volume esperado está **exatamente no ponto de equilíbrio** "
+                "(margem de segurança = 0)."
+            )
+
+        st.subheader("Grau de Alavancagem Operacional (GAO)")
+        st.write(f"GAO: **{gao:,.2f}**")
+
+        if gao > 0 and gao < 2:
+            st.info("GAO baixo: o lucro é pouco sensível às variações no volume de vendas.")
+        elif 2 <= gao < 5:
+            st.warning("GAO moderado: há risco moderado e bom potencial de retorno.")
+        elif gao >= 5:
+            st.error("GAO alto: o lucro é muito sensível às variações no volume de vendas.")
+        else:
+            st.write("GAO não definido para este cenário.")
+
+        # Gráfico
+        if q_max > q_min:
+            volumes = list(range(q_min, q_max + 1, q_step))
+            df = pd.DataFrame(
+                {
+                    "Volume": volumes,
+                    "Receita": [preco * q for q in volumes],
+                    "Gasto Variável": [gasto_var * q for q in volumes],
+                    "Gasto Fixo": [gastos_fixos for _ in volumes],  # NOVA SÉRIE
+                    "Lucro": [
+                        (preco - gasto_var) * q - gastos_fixos for q in volumes
+                    ],
+                }
+            ).set_index("Volume")
+
+            st.subheader("Comportamento do Lucro por Volume de Vendas")
+            st.line_chart(df)
+
+        st.caption("LABCOST – Uso educacional. Modo: Produto único.")
+
+    # -----------------------------------------------------
+    # MODO 2 – MIX DE PRODUTOS
+    # -----------------------------------------------------
+    else:
+        st.subheader("Modo: Mix de produtos")
+
+        st.sidebar.header("Configurações da Simulação – Mix de produtos")
+
+        gastos_fixos_mix = st.sidebar.number_input(
+            "Gastos fixos totais (R$) – comuns a todos os produtos",
+            0.0,
+            1000000.0,
+            50000.0,
+        )
+
+        num_produtos = st.sidebar.slider(
+            "Número de produtos no mix", min_value=2, max_value=5, value=3
+        )
+
+        st.write(
+            """
+            Preencha as informações de cada produto abaixo.  
+            O sistema irá calcular:
+            - Margem de contribuição unitária de cada produto;  
+            - Mix de vendas (% em unidades);  
+            - Margem de contribuição ponderada do mix;  
+            - Ponto de equilíbrio do mix (unidades totais e por produto);  
+            - Resultado total (receita, gasto variável total, margem de contribuição e lucro).
+            """
+        )
+
+        produtos = []
+        for i in range(num_produtos):
+            st.markdown(f"### Produto {i+1}")
+            col1, col2, col3, col4 = st.columns([2, 1.2, 1.2, 1.2])
+
+            with col1:
+                nome = st.text_input(
+                    f"Nome do Produto {i+1}",
+                    value=f"Produto {i+1}",
+                    key=f"nome_{i}",
+                )
+            with col2:
+                preco_i = st.number_input(
+                    f"Preço venda {i+1} (R$)",
+                    0.0,
+                    100000.0,
+                    100.0 + 10 * i,
+                    key=f"preco_{i}",
+                )
+            with col3:
+                gv_i = st.number_input(
+                    f"Gasto variável {i+1} (R$)",
+                    0.0,
+                    100000.0,
+                    40.0 + 5 * i,
+                    key=f"gv_{i}",
+                )
+            with col4:
+                q_i = st.number_input(
+                    f"Volume esperado {i+1} (unid.)",
+                    0,
+                    1000000,
+                    1000,
+                    key=f"q_{i}",
+                )
+
+            produtos.append(
+                {
+                    "Nome": nome,
+                    "Preco": preco_i,
+                    "GV": gv_i,
+                    "Q": q_i,
+                }
+            )
+
+        # Somatório de volumes para cálculo do mix
+        soma_q = sum(p["Q"] for p in produtos)
+
+        if soma_q == 0:
+            st.warning("Informe volumes de vendas maiores que zero para calcular o mix.")
+        else:
+            linhas = []
+            mc_mix_ponderada = 0
+
+            receita_total = 0
+            gv_total = 0
+            mc_total = 0
+
+            for p in produtos:
+                mc_unit_i = p["Preco"] - p["GV"]
+                receita_i = p["Preco"] * p["Q"]
+                gv_i_total = p["GV"] * p["Q"]
+                mc_i_total = mc_unit_i * p["Q"]
+                mix_i = p["Q"] / soma_q  # proporção em unidades
+
+                receita_total += receita_i
+                gv_total += gv_i_total
+                mc_total += mc_i_total
+
+                mc_mix_ponderada += mc_unit_i * mix_i
+
+                linhas.append(
+                    {
+                        "Produto": p["Nome"],
+                        "Preço (R$)": p["Preco"],
+                        "Gasto Var. unit. (R$)": p["GV"],
+                        "MC unit. (R$)": mc_unit_i,
+                        "Volume esperado": p["Q"],
+                        "Mix (%)": mix_i * 100,
+                        "Receita (R$)": receita_i,
+                        "Gasto Var. Total (R$)": gv_i_total,
+                        "MC Total (R$)": mc_i_total,
+                    }
+                )
+
+            # Ponto de equilíbrio do mix
+            if mc_mix_ponderada > 0:
+                pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
+            else:
+                pe_mix_unidades = 0
+
+            # PE de cada produto
+            for linha in linhas:
+                mix_frac = linha["Mix (%)"] / 100
+                linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
+
+            lucro_total = mc_total - gastos_fixos_mix
+
+            df_mix = pd.DataFrame(linhas)
+
+            st.subheader("Resumo por produto")
+            st.dataframe(
+                df_mix.style.format(
+                    {
+                        "Preço (R$)": "R$ {:,.2f}",
+                        "Gasto Var. unit. (R$)": "R$ {:,.2f}",
+                        "MC unit. (R$)": "R$ {:,.2f}",
+                        "Receita (R$)": "R$ {:,.2f}",
+                        "Gasto Var. Total (R$)": "R$ {:,.2f}",
+                        "MC Total (R$)": "R$ {:,.2f}",
+                        "Mix (%)": "{:,.1f}%",
+                        "PE (unid.) no mix": "{:,.0f}",
+                    }
+                ),
+                use_container_width=True,
+            )
+
+            st.subheader("Indicadores do Mix")
+
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Receita total", f"R$ {receita_total:,.2f}")
+                st.metric("Gasto variável total", f"R$ {gv_total:,.2f}")
+            with col_b:
+                st.metric("Margem de contribuição total", f"R$ {mc_total:,.2f}")
+                st.metric("Gastos fixos totais", f"R$ {gastos_fixos_mix:,.2f}")
+            with col_c:
+                st.metric("Lucro operacional", f"R$ {lucro_total:,.2f}")
+                st.metric(
+                    "MC unitária média ponderada do mix",
+                    f"R$ {mc_mix_ponderada:,.2f}",
+                )
+
+            st.markdown(
+                f"""
+                **Ponto de equilíbrio do mix (unidades totais):**  
+                {pe_mix_unidades:,.0f} unidades *combinadas*, distribuídas conforme o mix de vendas.
+
+                A tabela acima mostra, na coluna **"PE (unid.) no mix"**, quantas unidades de cada produto
+                precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
+                """
+            )
+
+        st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+
+# =========================================================
+# TAB 2 – CLASSIFICAÇÃO DE GASTOS
+# =========================================================
+with tab_classificacao:
+    st.title("Classificação de Gastos: Custos x Despesas e Detalhamento")
+
+    st.write(
+        """
+        Nesta atividade, o aluno deve **classificar os gastos** em:
+        - **Custo** ou **Despesa**;  
+        - E também indicar a **classificação detalhada**, escolhendo uma das opções:
+
+        - Custo Direto  
+        - Custo Indireto  
+        - Custo Fixo  
+        - Custo Variável  
+        - Despesa Fixa  
+        - Despesa Variável  
+        - Despesa Administrativa  
+        - Despesa com Vendas  
+        - Despesa Financeira  
+        """
+    )
+
+    itens = [
+        {
+            "descricao": "Salário da mão de obra diretamente envolvida na produção.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Direto",
+        },
+        {
+            "descricao": "Matéria-prima utilizada na fabricação do produto.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Direto",
+        },
+        {
+            "descricao": "Aluguel do prédio da fábrica.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Fixo",
+        },
+        {
+            "descricao": "Energia elétrica das máquinas na fábrica (varia com a produção).",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Variável",
+        },
+        {
+            "descricao": "Depreciação das máquinas utilizadas na produção.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Indireto",
+        },
+        {
+            "descricao": "Comissão dos vendedores sobre as vendas realizadas.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Variável",
+        },
+        {
+            "descricao": "Salário fixo da equipe de vendas.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa com Vendas",
+        },
+        {
+            "descricao": "Salário da equipe administrativa do escritório central.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Administrativa",
+        },
+        {
+            "descricao": "Gastos com propaganda e publicidade.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa com Vendas",
+        },
+        {
+            "descricao": "Juros pagos sobre empréstimos bancários.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Financeira",
+        },
+        {
+            "descricao": "Seguro das instalações da fábrica (valor fixo anual).",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Fixo",
+        },
+        {
+            "descricao": "Telefone e internet do escritório administrativo.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Administrativa",
+        },
+    ]
+
+    opcoes_tipo = ["Custo", "Despesa"]
+    opcoes_classificacao = [
+        "Custo Direto",
+        "Custo Indireto",
+        "Custo Fixo",
+        "Custo Variável",
+        "Despesa Fixa",
+        "Despesa Variável",
+        "Despesa Administrativa",
+        "Despesa com Vendas",
+        "Despesa Financeira",
+    ]
+
+    st.subheader("Atividade")
+    st.write(
+        "Para cada item abaixo, selecione **se é Custo ou Despesa** e a **classificação detalhada**."
+    )
+
+    respostas_tipo = []
+    respostas_classificacao = []
+
+    for i, item in enumerate(itens):
+        st.markdown(f"**Item {i+1}:** {item['descricao']}")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            tipo_escolhido = st.selectbox(
+                "Custo ou Despesa?",
+                opcoes_tipo,
+                key=f"tipo_{i}",
+            )
+        with col2:
+            classificacao_escolhida = st.selectbox(
+                "Classificação detalhada",
+                opcoes_classificacao,
+                key=f"class_{i}",
+            )
+
+        respostas_tipo.append(tipo_escolhido)
+        respostas_classificacao.append(classificacao_escolhida)
+        st.markdown("---")
+
+    if st.button("Corrigir respostas"):
+        resultados = []
+        acertos_tipo = 0
+        acertos_class = 0
+        acertos_totais = 0
+
+        for i, item in enumerate(itens):
+            tipo_ok = respostas_tipo[i] == item["tipo_correto"]
+            class_ok = respostas_classificacao[i] == item["classificacao_correta"]
+            acertou_tudo = tipo_ok and class_ok
+
+            if tipo_ok:
+                acertos_tipo += 1
+            if class_ok:
+                acertos_class += 1
+            if acertou_tudo:
+                acertos_totais += 1
+
+            resultados.append(
+                {
+                    "Item": i + 1,
+                    "Descrição": item["descricao"],
+                    "Tipo marcado": respostas_tipo[i],
+                    "Tipo correto": item["tipo_correto"],
+                    "Classificação marcada": respostas_classificacao[i],
+                    "Classificação correta": item["classificacao_correta"],
+                    "Acertou tipo e class.?": "Sim" if acertou_tudo else "Não",
+                }
+            )
+
+        df_result = pd.DataFrame(resultados)
+        st.subheader("Resultado da Atividade")
+        st.write(f"Acertos no **tipo (Custo/Despesa)**: **{acertos_tipo} de {len(itens)}**")
+        st.write(
+            f"Acertos na **classificação detalhada**: **{acertos_class} de {len(itens)}**"
+        )
+        st.write(
+            f"Itens com **tipo e classificação corretos ao mesmo tempo**: **{acertos_totais} de {len(itens)}**"
+        )
+        st.dataframe(df_result, use_container_width=True)
+
+        st.info(
+            "Sugestão didática: discuta com os alunos os itens em que houve erro, "
+            "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
+            "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
+        )
