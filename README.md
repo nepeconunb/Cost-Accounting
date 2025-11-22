@@ -22,17 +22,17 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diferente
 ### 🧮 Produto Único
 - Margem de contribuição unitária e total  
 - Ponto de equilíbrio (unidades e receita)  
-- Lucro/Prejuízo  
+- Lucro ou prejuízo operacional  
 - Margem de segurança  
-- GAO  
-- Gráficos: Receita, GV, GF, Lucro  
-- Custos unitários (GV, GF, GT)  
+- Grau de alavancagem operacional (GAO)  
+- Gráficos gerenciais (Receita, GV, GF, Lucro)  
+- Custos unitários (GV, GF, Total)  
 
 ### 📊 Mix de Produtos
-- MC por produto  
-- Mix (%)  
+- Margem de contribuição por produto  
+- Mix de vendas (%)  
 - MC ponderada  
-- PE do mix  
+- Ponto de equilíbrio do mix  
 - Lucro consolidado  
 
 ### 📚 Classificação de Gastos
@@ -56,13 +56,4 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diferente
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
-pip install -r requirements.txt
-streamlit run app.py
-http://localhost:8501
-git clone https://github.com/YOUR-USER/labcost.git
-cd labcost
-pip install -r requirements.txt
-streamlit run app.py
-http://localhost:8501
-
 
