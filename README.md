@@ -79,8 +79,6 @@ A página inicial apresenta:
 # 🔧 Instalação e Execução Local (PT-BR)
 
 ### 1. Clonar o repositório
-
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
-
