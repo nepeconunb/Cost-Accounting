@@ -14,7 +14,7 @@ O **LABCOST** é um simulador interativo desenvolvido para apoiar o ensino e a a
 - **Tomada de Decisão**
 - **Simulação de Negócios e Formação de Preços**
 
-A ferramenta permite que estudantes e gestores analisem de forma visual e dinâmica como **custos, volume e lucro** se comportam em diferentes cenários.
+Ele permite que estudantes e gestores analisem, de forma intuitiva e visual, como **custos, volume e lucro** se relacionam em diferentes cenários empresariais.
 
 ---
 
@@ -37,13 +37,17 @@ A ferramenta permite que estudantes e gestores analisem de forma visual e dinâm
   - Gasto fixo unitário  
   - Gasto total unitário  
 
+---
+
 ### 📊 Simulação de Mix de Produtos
 - Margem de contribuição por produto  
-- Cálculo do mix de vendas  
+- Cálculo do mix de vendas (%)  
 - Margem de contribuição média ponderada  
 - Ponto de equilíbrio do mix  
-- Distribuição da margem por produto  
+- Distribuição de margem por produto  
 - Lucro operacional consolidado  
+
+---
 
 ### 📚 Treinamento de Classificação de Gastos
 Atividade interativa para classificar:
@@ -53,7 +57,7 @@ Atividade interativa para classificar:
 - Fixo / Variável  
 - Administrativa / Comercial / Financeira  
 
-Com **correção automática** e feedback imediato ao aluno.
+Inclui **correção automática** e feedback imediato.
 
 ---
 
@@ -64,14 +68,14 @@ A página inicial apresenta:
 - Logo  
 - Introdução aos conceitos de custos  
 - Sugestões didáticas  
-- Orientações de uso  
+- Orientações de uso em sala  
 
 ---
 
 ## 🖼️ Capturas de Tela  
 *(Adicione suas imagens no diretório `/images`)*
 
-<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview1.png" width="600">  
 <img src="images/labcost_preview2.png" width="600">
 
 ---
