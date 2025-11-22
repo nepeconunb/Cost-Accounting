@@ -86,3 +86,25 @@ A página inicial apresenta:
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+git clone https://github.com/YOUR-USER/labcost.git
+cd labcost
+pip install -r requirements.txt
+streamlit run app.py
+http://localhost:8501
+
+---
+
+# 💚 **PRONTO!**  
+Agora você tem a **versão COMPLETÍSSIMA, com a parte em inglês integrada**.
+
+Se quiser, posso:
+
+✅ Adicionar badges (Python, Streamlit, MIT, UnB, NEPECON)  
+✅ Criar um banner visual para o topo  
+✅ Gerar uma versão PDF do README  
+✅ Criar uma página GitHub Pages para o projeto  
+
+É só pedir!
