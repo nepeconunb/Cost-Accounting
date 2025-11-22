@@ -6,7 +6,6 @@
 # 🇧🇷 VERSÃO EM PORTUGUÊS
 
 ## 📘 Sobre o LABCOST
-
 O **LABCOST** é um simulador interativo desenvolvido para apoiar o ensino e a aprendizagem em:
 
 - Contabilidade de Custos  
@@ -14,7 +13,7 @@ O **LABCOST** é um simulador interativo desenvolvido para apoiar o ensino e a a
 - Tomada de Decisão  
 - Simulação de Negócios e Formação de Preços  
 
-Ele permite visualizar como **custos, volume e lucro** se comportam em diversos cenários.
+Ele permite visualizar como **custos, volume e lucro** se comportam em diferentes cenários empresariais.
 
 ---
 
@@ -22,8 +21,8 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diversos 
 
 ### 🧮 Produto Único
 - Margem de contribuição unitária e total  
-- Ponto de equilíbrio  
-- Lucro / Prejuízo  
+- Ponto de equilíbrio (unidades e receita)  
+- Lucro/Prejuízo  
 - Margem de segurança  
 - GAO  
 - Gráficos: Receita, GV, GF, Lucro  
@@ -40,13 +39,13 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diversos 
 - Custo × Despesa  
 - Direto × Indireto  
 - Fixo × Variável  
-- Administrativo / Comercial / Financeiro  
+- Administrativa / Comercial / Financeira  
 - Com correção automática  
 
 ---
 
 ## 🖼️ Capturas de Tela
-<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview1.png" width="600">  
 <img src="images/labcost_preview2.png" width="600">
 
 ---
@@ -57,42 +56,5 @@ Ele permite visualizar como **custos, volume e lucro** se comportam em diversos 
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
-### 2. Instalar dependências
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-http://localhost:8501
-
----
-
-# ❌ **NÃO cole essa versão solta**, porque fica fora do formato:
-
-
-❌ ERRADO — aparece bagunçado  
-❌ não fica com cor de código  
-❌ o GitHub não interpreta como bloco técnico
-
----
-
-# 🎯 Onde exatamente colocar no README?
-
-Dentro desta seção:
-
-
-Logo depois do passo **1**.
-
-Assim:
-
-```md
-# 🔧 Instalação e Execução Local (PT-BR)
-
-### 1. Clonar o repositório
-```bash
-git clone https://github.com/SEU-USUARIO/labcost.git
-cd labcost
-pip install -r requirements.txt
-streamlit run app.py
-http://localhost:8501
-
 
 
