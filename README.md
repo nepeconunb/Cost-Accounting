@@ -79,4 +79,64 @@ A página inicial do LABCOST inclui:
 ```bash
 git clone https://github.com/SEU-USUARIO/labcost.git
 cd labcost
+---
 
+# 🇺🇸 ENGLISH VERSION
+
+## 📘 About LABCOST
+
+**LABCOST** is an interactive simulator designed to support teaching and learning in:
+
+- **Cost Accounting**
+- **Managerial Accounting / Controllership**
+- **Financial Decision-Making**
+- **Business Simulation and Pricing**
+
+It provides a visual and intuitive environment where students and managers can explore the interaction between **cost, volume, and profit** under real-world business scenarios.
+
+---
+
+## 🎯 Main Features
+
+### 🧮 Single Product Simulation
+- Unit Contribution Margin  
+- Total Contribution Margin  
+- Break-even point (units & revenue)  
+- Operating Income (Profit or Loss)  
+- Safety Margin (units, revenue, %)  
+- Degree of Operating Leverage (DOL)  
+- Charts showing:  
+  - Revenue  
+  - Variable Costs  
+  - Fixed Costs  
+  - Profit  
+- Unit Cost behavior:
+  - Variable Cost per Unit  
+  - Fixed Cost per Unit  
+  - Total Cost per Unit  
+
+### 📊 Product Mix Simulation
+- Contribution margin per product  
+- Sales mix (%)  
+- Weighted average contribution margin  
+- Mix break-even point  
+- Contribution allocation  
+- Consolidated operating income  
+
+### 📚 Cost Classification Training
+Interactive activity to classify:
+
+- Cost vs. Expense  
+- Direct / Indirect  
+- Fixed / Variable  
+- Administrative / Selling / Financial  
+
+Includes **automatic scoring and real-time feedback**.
+
+---
+
+## 🖼️ Interface Preview  
+*(Add your screenshots later)*
+
+<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview2.png" width="600">
