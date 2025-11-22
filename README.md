@@ -27,12 +27,12 @@ A ferramenta permite que estudantes e gestores analisem de forma visual e dinâm
 - Lucro/Prejuízo operacional  
 - Margem de segurança (unidades, receita, %)  
 - Grau de Alavancagem Operacional (GAO)  
-- Gráficos gerenciais:
+- **Gráficos gerenciais:**
   - Receita total  
   - Gastos Variáveis  
   - Gastos Fixos  
   - Lucro  
-- Custos unitários:
+- **Custos unitários:**
   - Gasto variável unitário  
   - Gasto fixo unitário  
   - Gasto total unitário  
@@ -42,11 +42,11 @@ A ferramenta permite que estudantes e gestores analisem de forma visual e dinâm
 - Cálculo do mix de vendas  
 - Margem de contribuição média ponderada  
 - Ponto de equilíbrio do mix  
-- Distribuição da margem per produto  
+- Distribuição da margem por produto  
 - Lucro operacional consolidado  
 
 ### 📚 Treinamento de Classificação de Gastos
-Atividade prática e interativa para classificar:
+Atividade interativa para classificar:
 
 - Custo vs. Despesa  
 - Direto / Indireto  
@@ -61,15 +61,15 @@ Com **correção automática** e feedback imediato ao aluno.
 
 A página inicial apresenta:
 
-- Logo do sistema  
+- Logo  
 - Introdução aos conceitos de custos  
 - Sugestões didáticas  
-- Orientações de uso em sala de aula  
+- Orientações de uso  
 
 ---
 
 ## 🖼️ Capturas de Tela  
-*(Adicione suas imagens reais no diretório `/images`)*
+*(Adicione suas imagens no diretório `/images`)*
 
 <img src="images/labcost_preview1.png" width="600">
 <img src="images/labcost_preview2.png" width="600">
