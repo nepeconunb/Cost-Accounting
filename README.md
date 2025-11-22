@@ -66,6 +66,8 @@ A página inicial do LABCOST inclui:
 
 ## 🖼️ Capturas de Tela
 
-> *(Adicione suas imagens reais depois)*
+*(Adicione suas imagens reais depois)*
 
-
+```html
+<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview2.png" width="600">
