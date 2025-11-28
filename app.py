@@ -1,9 +1,11 @@
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
 # ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
 st.set_page_config(
     page_title="LABCOST – Simulador de Gastos e Custos",
+    page_icon="📊",
     layout="wide",
 )
 
@@ -18,17 +20,27 @@ tab_home, tab_simulador, tab_classificacao = st.tabs(
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
+    # ---- LOGO (opcional, sem aviso chato) ----
     with col_logo:
-        try:
-            st.image("labcost_logo.svg", width=220)
-        except Exception:
-            st.write("⚠️ Coloque o arquivo `labcost_logo.svg` na mesma pasta do app.py.")
+        logo_path = Path("labcost_logo.svg")
+        if logo_path.exists():
+            st.image(str(logo_path), width=220)
+        else:
+            st.empty()
         st.caption("LABCOST – Laboratório de Simulação de Gastos e Custos")
 
+    # ---- TEXTO PRINCIPAL COM DISCIPLINA / NEPECON ----
     with col_texto:
         st.title("Bem-vindo ao LABCOST")
         st.markdown(
             """
+            **LABCOST – Laboratório de Simulação de Gastos e Custos**  
+
+            Este simulador é utilizado na disciplina de **Contabilidade de Custos e Gestão**,
+            ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
+            como parte das iniciativas do **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
+            Econômica e Socioambiental**.
+
             O **LABCOST** é um laboratório virtual para apoiar o ensino de **Contabilidade de Custos e Gestão**, com foco em:
 
             - Comportamento dos **gastos fixos e variáveis**  
@@ -103,8 +115,8 @@ with tab_home:
     )
 
     st.info(
-        "Dica: se estiver usando o Streamlit Cloud, você pode compartilhar o link do LABCOST "
-        "diretamente com os alunos para experimentação em tempo real."
+        "O LABCOST é uma ferramenta educacional desenvolvida no âmbito do NEPECON/UnB "
+        "para apoiar o ensino de Contabilidade de Custos e Gestão."
     )
 
 # =========================================================
@@ -629,10 +641,3 @@ with tab_classificacao:
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
 
-import streamlit as st
-
-st.set_page_config(
-    page_title="LABCOST – Simulador de Gastos e Custos",
-    page_icon="📊",
-    layout="wide"
-)
