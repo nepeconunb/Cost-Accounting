@@ -629,3 +629,25 @@ with tab_classificacao:
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
 
+import streamlit as st
+
+st.set_page_config(
+    page_title="LABCOST – Simulador de Gastos e Custos",
+    page_icon="📊",
+    layout="wide"
+)
+
+# --- CABEÇALHO ---
+st.markdown("""
+<div style="padding: 15px; background-color: #0A3D62; border-radius: 10px;">
+    <h1 style="color:white; text-align:center;">
+        🧮 LABCOST – Simulador de Gastos e Custos
+    </h1>
+    <h3 style="color:#dff9fb; text-align:center;">
+        Disciplina de Contabilidade de Custos – Profª Fátima Freire (UnB)
+    </h3>
+    <p style="color:#dcdde1; text-align:center; font-size:16px;">
+        Projeto educacional do NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade Econômica e Socioambiental
+    </p>
+</div>
+""", unsafe_allow_html=True)
