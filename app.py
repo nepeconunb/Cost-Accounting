@@ -666,12 +666,14 @@ with tab_markup:
 
     st.write(
         """
-        Esta planilha permite calcular o **preço de venda** a partir do **custo unitário**
+        Esta planilha permite calcular o **preço de venda** a partir de um **custo unitário**
         e dos **percentuais incidentes sobre o preço de venda (PV)**, como impostos,
         comissões, despesas e margem de lucro desejada.
 
-        A lógica é a mesma das planilhas clássicas de **Mark-up** usadas em Contabilidade
-        de Custos / Formação de Preços.
+        Você pode escolher entre dois **métodos de custeio** para definir o custo-base:
+        - **Custeio Variável**: considera apenas os **custos variáveis de fabricação**;
+        - **Custeio por Absorção**: considera **custos variáveis + custos fixos de fabricação
+          rateados por unidade**.
         """
     )
 
@@ -681,17 +683,53 @@ with tab_markup:
 
     # ---------------- ENTRADAS ----------------
     with col_esq:
-        st.subheader("Entradas")
+        st.subheader("Entradas – Custo de Produção")
 
-        custo_unitario = st.number_input(
-            "Custo unitário (R$)",
+        metodo_custeio = st.radio(
+            "Método de custeio:",
+            ["Custeio Variável", "Custeio por Absorção"],
+            horizontal=True,
+        )
+
+        # Custo variável unitário
+        custo_var_unit = st.number_input(
+            "Custo variável unitário de fabricação (R$)",
             min_value=0.0,
-            value=100.0,
+            value=80.0,
             step=1.0,
             format="%.2f",
         )
 
-        st.markdown("#### Percentuais sobre o **Preço de Venda (PV)**")
+        # Dados adicionais para custeio por absorção
+        custo_fixo_unit = 0.0
+        custo_fixo_total = 0.0
+        volume_producao = 0
+
+        if metodo_custeio == "Custeio por Absorção":
+            st.markdown("#### Dados para rateio dos custos fixos de fabricação")
+            custo_fixo_total = st.number_input(
+                "Custos fixos de fabricação no período (R$)",
+                min_value=0.0,
+                value=20000.0,
+                step=500.0,
+                format="%.2f",
+            )
+            volume_producao = st.number_input(
+                "Volume produzido no período (unidades)",
+                min_value=1,
+                value=1000,
+                step=100,
+            )
+            custo_fixo_unit = custo_fixo_total / volume_producao
+
+        # Custo-base conforme método de custeio
+        if metodo_custeio == "Custeio Variável":
+            custo_unitario_base = custo_var_unit
+        else:
+            custo_unitario_base = custo_var_unit + custo_fixo_unit
+
+        st.markdown("---")
+        st.subheader("Percentuais sobre o **Preço de Venda (PV)**")
 
         impostos_perc = st.number_input(
             "Impostos sobre vendas (% do PV)",
@@ -738,6 +776,16 @@ with tab_markup:
     with col_dir:
         st.subheader("Cálculo do Mark-up")
 
+        st.markdown(
+            f"""
+            **Método de custeio selecionado:** `{metodo_custeio}`  
+
+            - Custo variável unitário de fabricação: **R$ {custo_var_unit:,.2f}**  
+            - Custo fixo unitário de fabricação (rateado): **R$ {custo_fixo_unit:,.2f}**  
+            - **Custo-base unitário para o Mark-up:** **R$ {custo_unitario_base:,.2f}**
+            """
+        )
+
         soma_perc_sobre_pv = (
             impostos_perc
             + comissao_perc
@@ -756,8 +804,10 @@ with tab_markup:
         else:
             # Fórmula clássica do Mark-up:
             # Mark-up = 1 / (1 - % sobre PV)
-            fator_markup = 1 / (1 - soma_perc_sobre_pv) if custo_unitario > 0 else 0
-            preco_venda = custo_unitario * fator_markup
+            fator_markup = (
+                1 / (1 - soma_perc_sobre_pv) if custo_unitario_base > 0 else 0
+            )
+            preco_venda = custo_unitario_base * fator_markup
 
             st.metric("Fator de Mark-up", f"{fator_markup:,.4f}")
             st.metric("Preço de venda sugerido (PV)", f"R$ {preco_venda:,.2f}")
@@ -776,9 +826,19 @@ with tab_markup:
 
             dados_tabela = [
                 {
-                    "Componente": "Custo unitário",
+                    "Componente": "Custo variável unitário de fabricação",
                     "% sobre PV": "",
-                    "Valor (R$)": custo_unitario,
+                    "Valor (R$)": custo_var_unit,
+                },
+                {
+                    "Componente": "Custo fixo unitário de fabricação (absorção)",
+                    "% sobre PV": "",
+                    "Valor (R$)": custo_fixo_unit,
+                },
+                {
+                    "Componente": f"Custo unitário base ({metodo_custeio})",
+                    "% sobre PV": "",
+                    "Valor (R$)": custo_unitario_base,
                 },
                 {
                     "Componente": "Impostos sobre vendas",
@@ -820,13 +880,14 @@ with tab_markup:
             )
         else:
             st.info(
-                "Informe os dados na coluna da esquerda para calcular o Mark-up "
+                "Informe o custo e os percentuais para calcular o Mark-up "
                 "e gerar a planilha-resumo."
             )
 
     st.markdown("---")
     st.caption(
         "Planilha de Mark-up integrada ao LABCOST – uso educacional na disciplina de "
-        "Contabilidade de Custos e Gestão (UnB / NEPECON)."
+        "Contabilidade de Custos e Gestão (UnB / NEPECON), com métodos de "
+        "custeio variável e custeio por absorção."
     )
 
