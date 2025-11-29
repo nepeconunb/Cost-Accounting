@@ -39,7 +39,8 @@ with tab_home:
             Este simulador é utilizado na disciplina de **Contabilidade de Custos**,
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
             como parte das iniciativas do projeto de Extensão **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
-            Econômica e Socioambiental**.
+            Econômica e Socioambiental**. 
+            Contato: nepeconunb@gmail.com
 
             O **LABCOST** é um laboratório virtual para apoiar o ensino de **Contabilidade de Custos e Gestão**, com foco em:
 
