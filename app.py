@@ -11,10 +11,14 @@ st.set_page_config(
 )
 
 # ---------------- TABS PRINCIPAIS ----------------
-tab_home, tab_simulador, tab_classificacao = st.tabs(
-    ["🏠 Página inicial", "💻 Simulador de Gastos e Custos", "📚 Classificação de Gastos"]
+tab_home, tab_simulador, tab_classificacao, tab_markup = st.tabs(
+    [
+        "🏠 Página inicial",
+        "💻 Simulador de Gastos e Custos",
+        "📚 Classificação de Gastos",
+        "📈 Planilha de Mark-up"
+    ]
 )
-
 # =========================================================
 # TAB 0 – PÁGINA INICIAL
 # =========================================================
