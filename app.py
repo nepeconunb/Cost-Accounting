@@ -2,25 +2,29 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-# ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
+# --------------------------------------------------------
+# CONFIGURAÇÃO DA PÁGINA
+# --------------------------------------------------------
 st.set_page_config(
     page_title="LABCOST – Simulador de Gastos e Custos",
     page_icon="📊",
     layout="wide",
 )
 
-# ---------------- TABS PRINCIPAIS ----------------
+# --------------------------------------------------------
+# TABS PRINCIPAIS
+# --------------------------------------------------------
 tab_home, tab_simulador, tab_classificacao = st.tabs(
     ["🏠 Página inicial", "💻 Simulador de Gastos e Custos", "📚 Classificação de Gastos"]
 )
 
-# =========================================================
+# ========================================================
 # TAB 0 – PÁGINA INICIAL
-# =========================================================
+# ========================================================
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
-    # ---- LOGO (opcional, sem aviso) ----
+    # ---- LOGO (opcional) ----
     with col_logo:
         logo_path = Path("labcost_logo.svg")
         if logo_path.exists():
@@ -29,7 +33,7 @@ with tab_home:
             st.empty()
         st.caption("LABCOST – Laboratório de Simulação de Gastos e Custos")
 
-    # ---- TEXTO PRINCIPAL COM DISCIPLINA / NEPECON ----
+    # ---- TEXTO PRINCIPAL ----
     with col_texto:
         st.title("Bem-vindo ao LABCOST")
         st.markdown(
@@ -39,7 +43,7 @@ with tab_home:
             Este simulador é utilizado na disciplina de **Contabilidade de Custos**,
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
             como parte das iniciativas do **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
-            Econômica e Socioambiental**. 
+            Econômica e Socioambiental**.
             Contato: nepeconunb@gmail.com
             Youtube: https://www.youtube.com/channel/UCu55I4Qpp2nBYWu5-qftkZw/videos
 
@@ -121,9 +125,9 @@ with tab_home:
         "para apoiar o ensino de Contabilidade de Custos e Gestão."
     )
 
-# =========================================================
+# ========================================================
 # TAB 1 – SIMULADOR DE GASTOS E CUSTOS
-# =========================================================
+# ========================================================
 with tab_simulador:
     st.title("LABCOST – Simulador de Gastos e Custos")
 
@@ -144,9 +148,9 @@ with tab_simulador:
         horizontal=True,
     )
 
-    # -----------------------------------------------------
+    # ----------------------------------------------------
     # MODO 1 – PRODUTO ÚNICO
-    # -----------------------------------------------------
+    # ----------------------------------------------------
     if modo == "Produto único":
         st.subheader("Modo: Produto único")
 
@@ -171,7 +175,7 @@ with tab_simulador:
         q_max = st.sidebar.number_input("Volume máximo (gráfico)", 0, 1000000, 2000)
         q_step = st.sidebar.number_input("Incremento (gráfico)", 1, 1000000, 100)
 
-        # ---------------- CÁLCULOS PRINCIPAIS ----------------
+        # ----------- CÁLCULOS PRINCIPAIS -----------------
         mc_unit = preco - gasto_var
         mc_total = mc_unit * quantidade
         receita_total = preco * quantidade
@@ -224,17 +228,17 @@ with tab_simulador:
         st.subheader("Demonstração do Resultado do Exercício (DRE)")
         st.markdown(
             f"""
-        **Receita Total:** R$ {receita_total:,.2f}  
-        **(-) Gastos Variáveis Totais:** R$ {gasto_var_total:,.2f}  
-        **= Margem de Contribuição Total:** R$ {mc_total:,.2f}  
+**Receita Total:** R$ {receita_total:,.2f}  
+**(-) Gastos Variáveis Totais:** R$ {gasto_var_total:,.2f}  
+**= Margem de Contribuição Total:** R$ {mc_total:,.2f}  
 
-        **(-) Gastos Fixos Totais:** R$ {gastos_fixos:,.2f}  
+**(-) Gastos Fixos Totais:** R$ {gastos_fixos:,.2f}  
 
-        **= Lucro/Prejuízo Operacional:**  
-        <span style='font-size:22px; font-weight:bold; color:{'green' if lucro>=0 else 'red'}'>
-        R$ {lucro:,.2f}
-        </span>
-        """,
+**= Lucro/Prejuízo Operacional:**  
+<span style='font-size:22px; font-weight:bold; color:{'green' if lucro>=0 else 'red'}'>
+R$ {lucro:,.2f}
+</span>
+""",
             unsafe_allow_html=True,
         )
 
@@ -262,7 +266,7 @@ with tab_simulador:
         else:
             st.write("GAO não definido para este cenário.")
 
-        # ---------------- GRÁFICO ----------------
+        # ----------- GRÁFICO VOLUME x RESULTADOS ----------
         if q_max > q_min and q_step > 0:
             volumes = list(range(q_min, q_max + 1, q_step))
 
@@ -291,9 +295,9 @@ with tab_simulador:
 
         st.caption("LABCOST – Uso educacional. Modo: Produto único.")
 
-    # -----------------------------------------------------
+    # ----------------------------------------------------
     # MODO 2 – MIX DE PRODUTOS
-    # -----------------------------------------------------
+    # ----------------------------------------------------
     else:
         st.subheader("Modo: Mix de produtos")
 
@@ -354,7 +358,7 @@ with tab_simulador:
                     f"Volume esperado {i+1} (unid.)",
                     0,
                     1000000,
-                    1000,
+                    100,          # valor padrão > 0 para evitar PE zerado
                     key=f"q_{i}",
                 )
 
@@ -371,7 +375,9 @@ with tab_simulador:
         soma_q = sum(p["Q"] for p in produtos)
 
         if soma_q == 0:
-            st.warning("Informe volumes de vendas maiores que zero para calcular o mix.")
+            st.warning(
+                "Informe volumes de vendas **maiores que zero** para calcular o mix e o ponto de equilíbrio."
+            )
         else:
             linhas = []
             mc_mix_ponderada = 0.0
@@ -407,19 +413,16 @@ with tab_simulador:
                     }
                 )
 
-            # Ponto de equilíbrio do mix (total de unidades combinadas)
-            if mc_mix_ponderada > 0 and gastos_fixos_mix > 0:
+            # Ponto de equilíbrio do mix (total em unidades)
+            if mc_mix_ponderada > 0:
                 pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
             else:
-                pe_mix_unidades = None
+                pe_mix_unidades = 0.0
 
-            # PE de cada produto
+            # PE por produto, mantendo o mix informado
             for linha in linhas:
-                mix_frac = linha["Mix (%)"] / 100
-                if pe_mix_unidades is not None:
-                    linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
-                else:
-                    linha["PE (unid.) no mix"] = None
+                mix_frac = linha["Mix (%)"] / 100.0
+                linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
 
             lucro_total = mc_total - gastos_fixos_mix
 
@@ -458,42 +461,29 @@ with tab_simulador:
                     f"R$ {mc_mix_ponderada:,.2f}",
                 )
 
-            if pe_mix_unidades is not None:
-                st.markdown(
-                    f"""
-                    **Ponto de equilíbrio do mix (unidades totais):**  
-                    {pe_mix_unidades:,.0f} unidades *combinadas*, distribuídas conforme o mix de vendas.
+            st.markdown(
+                f"""
+                **Ponto de equilíbrio do mix (unidades totais):**  
+                {pe_mix_unidades:,.0f} unidades *combinadas*, distribuídas conforme o mix de vendas.
 
-                    A tabela acima mostra, na coluna **"PE (unid.) no mix"**, quantas unidades de cada produto
-                    precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
-                    """
-                )
+                A tabela acima mostra, na coluna **"PE (unid.) no mix"**, quantas unidades de cada produto
+                precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
+                """
+            )
 
-                # -------- GRÁFICO DO PE POR PRODUTO ----------
-                st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+            # ---------- GRÁFICO: PE POR PRODUTO --------------
+            if "PE (unid.) no mix" in df_mix.columns:
                 df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
-                df_pe = df_pe[df_pe["PE (unid.) no mix"].notna()]
+                df_pe = df_pe.set_index("Produto")
 
-                if not df_pe.empty:
-                    df_pe_chart = df_pe.set_index("Produto")
-                    st.bar_chart(df_pe_chart)
-                else:
-                    st.info(
-                        "Os valores de ponto de equilíbrio por produto não puderam ser calculados "
-                        "porque a margem de contribuição ponderada do mix é menor ou igual a zero."
-                    )
-            else:
-                st.warning(
-                    "Não foi possível calcular o ponto de equilíbrio do mix. "
-                    "Verifique se a **margem de contribuição ponderada** é positiva "
-                    "e se os **gastos fixos** são maiores que zero."
-                )
+                st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+                st.bar_chart(df_pe)
 
-        st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+            st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
-# =========================================================
+# ========================================================
 # TAB 2 – CLASSIFICAÇÃO DE GASTOS
-# =========================================================
+# ========================================================
 with tab_classificacao:
     st.title("Classificação de Gastos: Custos x Despesas e Detalhamento")
 
