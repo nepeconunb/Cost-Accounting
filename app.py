@@ -487,22 +487,45 @@ with tab_simulador:
             )
 
             # Gráfico de PE por produto
-            st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+            # -------------------------------------------------------------
+# GRÁFICO DO PE DO MIX
+# -------------------------------------------------------------
+st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
 
-            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
-            df_pe = df_pe.set_index("Produto")
+df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
 
-            if df_pe["PE (unid.) no mix"].sum() <= 0:
-                st.warning(
-                    "O ponto de equilíbrio do mix ficou zero ou negativo. "
-                    "Verifique se os **preços de venda são maiores que os gastos variáveis** "
-                    "e se os **gastos fixos totais** são positivos."
-                )
-                st.dataframe(df_pe, use_container_width=True)
-            else:
-                st.bar_chart(df_pe)
+# Substituir valores inválidos por NaN
+df_pe["PE (unid.) no mix"] = df_pe["PE (unid.) no mix"].replace([float("inf"), -float("inf")], float("nan"))
 
-        st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+# Remover produtos sem PE válido (zero, negativo ou NaN)
+df_pe_validos = df_pe[df_pe["PE (unid.) no mix"] > 0].dropna()
+
+# Se nenhum produto tiver PE válido → mostrar aviso
+if df_pe_validos.empty:
+    st.warning(
+        """
+        Não é possível gerar o gráfico do ponto de equilíbrio.  
+        Isso ocorre quando:
+        - A **MC unitária média ponderada do mix** é zero ou negativa;  
+        - Algum produto tem MC negativa;  
+        - Os **gastos fixos são zero**;  
+        - O PE calculado fica **zero, negativo ou indefinido**.
+
+        Verifique os valores de preço, gastos variáveis e volumes informados.
+        """
+    )
+
+    st.write("Tabela dos PEs calculados:")
+    st.dataframe(df_pe, use_container_width=True)
+
+else:
+    # Preparar DataFrame com índice adequado
+    df_pe_validos = df_pe_validos.set_index("Produto")
+
+    st.bar_chart(df_pe_validos)
+
+    st.caption("Somente produtos com PE positivo aparecem no gráfico.")
+
 
 # =========================================================
 # TAB 2 – CLASSIFICAÇÃO DE GASTOS
