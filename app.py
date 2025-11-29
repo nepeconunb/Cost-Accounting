@@ -358,7 +358,7 @@ R$ {lucro:,.2f}
                     f"Volume esperado {i+1} (unid.)",
                     0,
                     1000000,
-                    100,          # valor padrão > 0 para evitar PE zerado
+                    100,
                     key=f"q_{i}",
                 )
 
@@ -371,7 +371,6 @@ R$ {lucro:,.2f}
                 }
             )
 
-        # Somatório de volumes para cálculo do mix
         soma_q = sum(p["Q"] for p in produtos)
 
         if soma_q == 0:
@@ -391,7 +390,7 @@ R$ {lucro:,.2f}
                 receita_i = p["Preco"] * p["Q"]
                 gv_i_total = p["GV"] * p["Q"]
                 mc_i_total = mc_unit_i * p["Q"]
-                mix_i = p["Q"] / soma_q  # proporção em unidades
+                mix_i = p["Q"] / soma_q
 
                 receita_total += receita_i
                 gv_total += gv_i_total
@@ -413,13 +412,11 @@ R$ {lucro:,.2f}
                     }
                 )
 
-            # Ponto de equilíbrio do mix (total em unidades)
             if mc_mix_ponderada > 0:
                 pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
             else:
                 pe_mix_unidades = 0.0
 
-            # PE por produto, mantendo o mix informado
             for linha in linhas:
                 mix_frac = linha["Mix (%)"] / 100.0
                 linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
@@ -478,6 +475,18 @@ R$ {lucro:,.2f}
 
                 st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
                 st.bar_chart(df_pe)
+
+                # Tabela de apoio para você ver os valores que estão indo para o gráfico
+                st.write("Tabela de apoio – PE por produto (valores plotados no gráfico):")
+                st.dataframe(df_pe)
+
+                if (df_pe["PE (unid.) no mix"] <= 0).all():
+                    st.warning(
+                        "Todos os valores de PE ficaram **zero ou negativos**. "
+                        "Isso acontece quando a **margem de contribuição média ponderada do mix "
+                        "é menor ou igual a zero** ou quando os **gastos fixos são zero**. "
+                        "Ajuste preços, gastos variáveis ou volumes para gerar uma MC positiva."
+                    )
 
             st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
