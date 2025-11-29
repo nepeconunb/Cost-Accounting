@@ -20,7 +20,7 @@ tab_home, tab_simulador, tab_classificacao = st.tabs(
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
-    # ---- LOGO (opcional) ----
+    # ---- LOGO (opcional, sem aviso chato) ----
     with col_logo:
         logo_path = Path("labcost_logo.svg")
         if logo_path.exists():
@@ -108,7 +108,7 @@ with tab_home:
     st.markdown(
         """
         - Propor **cenários diferentes** (ex.: aumento de preço, redução de gastos fixos, 
-          mudanças no mix de produtos) e pedir aos alunos que analisem o impacto no **ponto de equilíbrio** e no **lucro**.  
+          mudanças no mix de produtos) e pedir para os alunos analisarem o impacto no **ponto de equilíbrio** e no **lucro**.  
         - Usar o LABCOST em **aulas práticas de laboratório** ou em **atividades remotas**.  
         - Combinar com leituras sobre **margem de contribuição**, **decisão de mix de produtos** e **GAO**.  
         """
@@ -220,6 +220,7 @@ with tab_simulador:
 
         # DRE
         st.subheader("Demonstração do Resultado do Exercício (DRE)")
+        cor_lucro = "green" if lucro >= 0 else "red"
         st.markdown(
             f"""
         **Receita Total:** R$ {receita_total:,.2f}  
@@ -229,7 +230,7 @@ with tab_simulador:
         **(-) Gastos Fixos Totais:** R$ {gastos_fixos:,.2f}  
 
         **= Lucro/Prejuízo Operacional:**  
-        <span style='font-size:22px; font-weight:bold; color:{'green' if lucro>=0 else 'red'}'>
+        <span style='font-size:22px; font-weight:bold; color:{cor_lucro}'>
         R$ {lucro:,.2f}
         </span>
         """,
@@ -251,7 +252,7 @@ with tab_simulador:
         st.subheader("Grau de Alavancagem Operacional (GAO)")
         st.write(f"GAO: **{gao:,.2f}**")
 
-        if 0 < gao < 2:
+        if gao > 0 and gao < 2:
             st.info("GAO baixo: o lucro é pouco sensível às variações no volume de vendas.")
         elif 2 <= gao < 5:
             st.warning("GAO moderado: há risco moderado e bom potencial de retorno.")
@@ -304,7 +305,6 @@ with tab_simulador:
             50000.0,
         )
 
-        # ATÉ 10 PRODUTOS
         num_produtos = st.sidebar.slider(
             "Número de produtos no mix", min_value=2, max_value=10, value=3
         )
@@ -316,7 +316,7 @@ with tab_simulador:
             - Margem de contribuição unitária de cada produto;  
             - Mix de vendas (% em unidades);  
             - Margem de contribuição ponderada do mix;  
-            - **Ponto de equilíbrio do mix** (unidades totais e por produto);  
+            - Ponto de equilíbrio do mix (unidades totais e por produto);  
             - Resultado total (receita, gasto variável total, margem de contribuição e lucro).
             """
         )
@@ -373,11 +373,11 @@ with tab_simulador:
             st.warning("Informe volumes de vendas maiores que zero para calcular o mix.")
         else:
             linhas = []
-            mc_mix_ponderada = 0
+            mc_mix_ponderada = 0.0
 
-            receita_total = 0
-            gv_total = 0
-            mc_total = 0
+            receita_total = 0.0
+            gv_total = 0.0
+            mc_total = 0.0
 
             for p in produtos:
                 mc_unit_i = p["Preco"] - p["GV"]
@@ -406,21 +406,16 @@ with tab_simulador:
                     }
                 )
 
-            # Ponto de equilíbrio do mix (em unidades totais)
+            # Ponto de equilíbrio do mix
             if mc_mix_ponderada > 0:
                 pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
             else:
-                pe_mix_unidades = 0
+                pe_mix_unidades = 0.0
 
-            # PE de cada produto em unidades
+            # PE de cada produto
             for linha in linhas:
                 mix_frac = linha["Mix (%)"] / 100
                 linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
-
-            # PE do mix em receita total
-            pe_mix_receita = sum(
-                linha["PE (unid.) no mix"] * linha["Preço (R$)"] for linha in linhas
-            )
 
             lucro_total = mc_total - gastos_fixos_mix
 
@@ -459,73 +454,54 @@ with tab_simulador:
                     f"R$ {mc_mix_ponderada:,.2f}",
                 )
 
-            # Explicação do PE do mix + valores numéricos
             st.markdown(
-                """
-                ### 📌 Cálculo do Ponto de Equilíbrio do Mix
+                f"""
+                **Ponto de equilíbrio do mix (unidades totais):**  
+                {pe_mix_unidades:,.0f} unidades *combinadas*, distribuídas conforme o mix de vendas.
 
-                - MC unitária média ponderada do mix (R$/unidade):  
-                  MC_mix = soma das margens de contribuição unitárias ponderadas pelo mix em unidades.  
-
-                - Ponto de equilíbrio do mix em unidades totais:  
-                  PE_mix (unidades) = Gastos fixos totais / MC_mix  
-                """
-            )
-
-            st.markdown(
-                "• PE do mix (unidades totais): **{:,.0f} unid.**  \n"
-                "• PE do mix (receita total): **R$ {:,.2f}**".format(
-                    pe_mix_unidades, pe_mix_receita
-                )
-            )
-
-            st.markdown(
-                """
                 A tabela acima mostra, na coluna **"PE (unid.) no mix"**, quantas unidades de cada produto
                 precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
                 """
             )
 
-            # Gráfico de PE por produto
             # -------------------------------------------------------------
-# GRÁFICO DO PE DO MIX
-# -------------------------------------------------------------
-st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+            # GRÁFICO DO PE DO MIX
+            # -------------------------------------------------------------
+            st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
 
-df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
+            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
 
-# Substituir valores inválidos por NaN
-df_pe["PE (unid.) no mix"] = df_pe["PE (unid.) no mix"].replace([float("inf"), -float("inf")], float("nan"))
+            # Substituir valores inválidos por NaN
+            df_pe["PE (unid.) no mix"] = df_pe["PE (unid.) no mix"].replace(
+                [float("inf"), -float("inf")], float("nan")
+            )
 
-# Remover produtos sem PE válido (zero, negativo ou NaN)
-df_pe_validos = df_pe[df_pe["PE (unid.) no mix"] > 0].dropna()
+            # Remover produtos sem PE válido (zero, negativo ou NaN)
+            df_pe_validos = df_pe[df_pe["PE (unid.) no mix"] > 0].dropna()
 
-# Se nenhum produto tiver PE válido → mostrar aviso
-if df_pe_validos.empty:
-    st.warning(
-        """
-        Não é possível gerar o gráfico do ponto de equilíbrio.  
-        Isso ocorre quando:
-        - A **MC unitária média ponderada do mix** é zero ou negativa;  
-        - Algum produto tem MC negativa;  
-        - Os **gastos fixos são zero**;  
-        - O PE calculado fica **zero, negativo ou indefinido**.
+            if df_pe_validos.empty:
+                st.warning(
+                    """
+                    Não é possível gerar o gráfico do ponto de equilíbrio.  
+                    Isso ocorre quando:
+                    - A **MC unitária média ponderada do mix** é zero ou negativa;  
+                    - Algum produto tem MC negativa;  
+                    - Os **gastos fixos são zero**;  
+                    - O PE calculado fica **zero, negativo ou indefinido**.
 
-        Verifique os valores de preço, gastos variáveis e volumes informados.
-        """
-    )
+                    Verifique os valores de preço, gastos variáveis e volumes informados.
+                    """
+                )
 
-    st.write("Tabela dos PEs calculados:")
-    st.dataframe(df_pe, use_container_width=True)
+                st.write("Tabela dos PEs calculados:")
+                st.dataframe(df_pe, use_container_width=True)
 
-else:
-    # Preparar DataFrame com índice adequado
-    df_pe_validos = df_pe_validos.set_index("Produto")
+            else:
+                df_pe_validos = df_pe_validos.set_index("Produto")
+                st.bar_chart(df_pe_validos)
+                st.caption("Somente produtos com PE positivo aparecem no gráfico.")
 
-    st.bar_chart(df_pe_validos)
-
-    st.caption("Somente produtos com PE positivo aparecem no gráfico.")
-
+            st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
 # =========================================================
 # TAB 2 – CLASSIFICAÇÃO DE GASTOS
@@ -702,3 +678,4 @@ with tab_classificacao:
             "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
+
