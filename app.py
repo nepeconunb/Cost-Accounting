@@ -304,8 +304,9 @@ with tab_simulador:
             50000.0,
         )
 
+        # AGORA ATÉ 10 PRODUTOS
         num_produtos = st.sidebar.slider(
-            "Número de produtos no mix", min_value=2, max_value=5, value=3
+            "Número de produtos no mix", min_value=2, max_value=10, value=3
         )
 
         st.write(
@@ -462,6 +463,12 @@ with tab_simulador:
                 precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
                 """
             )
+
+            # --------- GRÁFICO DO PONTO DE EQUILÍBRIO POR PRODUTO ---------
+            st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+
+            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].set_index("Produto")
+            st.bar_chart(df_pe)
 
         st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
