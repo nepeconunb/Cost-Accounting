@@ -1,39 +1,33 @@
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+import altair as alt
 
-# --------------------------------------------------------
-# CONFIGURAÇÃO DA PÁGINA
-# --------------------------------------------------------
+# ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
 st.set_page_config(
     page_title="LABCOST – Simulador de Gastos e Custos",
     page_icon="📊",
     layout="wide",
 )
 
-# --------------------------------------------------------
-# TABS PRINCIPAIS
-# --------------------------------------------------------
+# ---------------- TABS PRINCIPAIS ----------------
 tab_home, tab_simulador, tab_classificacao = st.tabs(
     ["🏠 Página inicial", "💻 Simulador de Gastos e Custos", "📚 Classificação de Gastos"]
 )
 
-# ========================================================
+# =========================================================
 # TAB 0 – PÁGINA INICIAL
-# ========================================================
+# =========================================================
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
-    # ---- LOGO (opcional) ----
+    # Logo (opcional)
     with col_logo:
         logo_path = Path("labcost_logo.svg")
         if logo_path.exists():
             st.image(str(logo_path), width=220)
-        else:
-            st.empty()
         st.caption("LABCOST – Laboratório de Simulação de Gastos e Custos")
 
-    # ---- TEXTO PRINCIPAL ----
     with col_texto:
         st.title("Bem-vindo ao LABCOST")
         st.markdown(
@@ -125,9 +119,9 @@ with tab_home:
         "para apoiar o ensino de Contabilidade de Custos e Gestão."
     )
 
-# ========================================================
+# =========================================================
 # TAB 1 – SIMULADOR DE GASTOS E CUSTOS
-# ========================================================
+# =========================================================
 with tab_simulador:
     st.title("LABCOST – Simulador de Gastos e Custos")
 
@@ -148,41 +142,40 @@ with tab_simulador:
         horizontal=True,
     )
 
-    # ----------------------------------------------------
+    # -----------------------------------------------------
     # MODO 1 – PRODUTO ÚNICO
-    # ----------------------------------------------------
+    # -----------------------------------------------------
     if modo == "Produto único":
         st.subheader("Modo: Produto único")
 
         st.sidebar.header("Configurações da Simulação – Produto único")
 
         preco = st.sidebar.number_input(
-            "Preço de venda por unidade (R$)", 0.0, 10000.0, 100.0
+            "Preço de venda por unidade (R$)", min_value=0.0, max_value=10000.0, value=100.0
         )
         gasto_var = st.sidebar.number_input(
-            "Gasto variável por unidade (R$)", 0.0, 10000.0, 30.0
+            "Gasto variável por unidade (R$)", min_value=0.0, max_value=10000.0, value=30.0
         )
         gastos_fixos = st.sidebar.number_input(
-            "Gastos fixos totais (R$)", 0.0, 1000000.0, 25000.0
+            "Gastos fixos totais (R$)", min_value=0.0, max_value=1000000.0, value=25000.0
         )
         quantidade = st.sidebar.number_input(
-            "Volume de vendas esperado (unidades)", 0, 1000000, 1000
+            "Volume de vendas esperado (unidades)", min_value=0, max_value=1000000, value=1000
         )
 
         st.sidebar.markdown("---")
         st.sidebar.write("Parâmetros para o gráfico:")
-        q_min = st.sidebar.number_input("Volume mínimo (gráfico)", 0, 1000000, 0)
-        q_max = st.sidebar.number_input("Volume máximo (gráfico)", 0, 1000000, 2000)
-        q_step = st.sidebar.number_input("Incremento (gráfico)", 1, 1000000, 100)
+        q_min = st.sidebar.number_input("Volume mínimo (gráfico)", min_value=0, max_value=1000000, value=0)
+        q_max = st.sidebar.number_input("Volume máximo (gráfico)", min_value=0, max_value=1000000, value=2000)
+        q_step = st.sidebar.number_input("Incremento (gráfico)", min_value=1, max_value=1000000, value=100)
 
-        # ----------- CÁLCULOS PRINCIPAIS -----------------
+        # Cálculos principais
         mc_unit = preco - gasto_var
         mc_total = mc_unit * quantidade
         receita_total = preco * quantidade
         gasto_var_total = gasto_var * quantidade
         lucro = mc_total - gastos_fixos
 
-        # Ponto de equilíbrio
         if mc_unit != 0:
             pe_unidades = gastos_fixos / mc_unit
             pe_receita = pe_unidades * preco
@@ -190,13 +183,11 @@ with tab_simulador:
             pe_unidades = 0
             pe_receita = 0
 
-        # GAO
         if mc_total - gastos_fixos != 0:
             gao = mc_total / (mc_total - gastos_fixos)
         else:
             gao = 0
 
-        # Margem de Segurança
         margem_seg_unid = quantidade - pe_unidades
         margem_seg_receita = receita_total - pe_receita
         if quantidade > 0:
@@ -204,12 +195,11 @@ with tab_simulador:
         else:
             margem_seg_perc = 0
 
-        # Gastos Unitários
         gasto_variavel_unitario = gasto_var
         gasto_fixo_unitario = gastos_fixos / quantidade if quantidade > 0 else 0
         gasto_unitario_total = gasto_variavel_unitario + gasto_fixo_unitario
 
-        # ---------------- RESULTADOS ----------------
+        # Resultados
         st.header("Resultados da Simulação – Produto único")
 
         col1, col2 = st.columns(2)
@@ -224,21 +214,20 @@ with tab_simulador:
             st.write(f"Unidades: **{pe_unidades:,.0f}**")
             st.write(f"Receita necessária: **R$ {pe_receita:,.2f}**")
 
-        # DRE
         st.subheader("Demonstração do Resultado do Exercício (DRE)")
         st.markdown(
             f"""
-**Receita Total:** R$ {receita_total:,.2f}  
-**(-) Gastos Variáveis Totais:** R$ {gasto_var_total:,.2f}  
-**= Margem de Contribuição Total:** R$ {mc_total:,.2f}  
+            **Receita Total:** R$ {receita_total:,.2f}  
+            **(-) Gastos Variáveis Totais:** R$ {gasto_var_total:,.2f}  
+            **= Margem de Contribuição Total:** R$ {mc_total:,.2f}  
 
-**(-) Gastos Fixos Totais:** R$ {gastos_fixos:,.2f}  
+            **(-) Gastos Fixos Totais:** R$ {gastos_fixos:,.2f}  
 
-**= Lucro/Prejuízo Operacional:**  
-<span style='font-size:22px; font-weight:bold; color:{'green' if lucro>=0 else 'red'}'>
-R$ {lucro:,.2f}
-</span>
-""",
+            **= Lucro/Prejuízo Operacional:**  
+            <span style='font-size:22px; font-weight:bold; color:{'green' if lucro>=0 else 'red'}'>
+            R$ {lucro:,.2f}
+            </span>
+            """,
             unsafe_allow_html=True,
         )
 
@@ -250,9 +239,7 @@ R$ {lucro:,.2f}
         st.subheader("Margem de Segurança")
         st.write(f"Em unidades: **{margem_seg_unid:,.0f}**")
         st.write(f"Em receita: **R$ {margem_seg_receita:,.2f}**")
-        st.write(
-            f"Em percentual sobre o volume esperado: **{margem_seg_perc:,.1f}%**"
-        )
+        st.write(f"Em percentual sobre o volume esperado: **{margem_seg_perc:,.1f}%**")
 
         st.subheader("Grau de Alavancagem Operacional (GAO)")
         st.write(f"GAO: **{gao:,.2f}**")
@@ -266,7 +253,6 @@ R$ {lucro:,.2f}
         else:
             st.write("GAO não definido para este cenário.")
 
-        # ----------- GRÁFICO VOLUME x RESULTADOS ----------
         if q_max > q_min and q_step > 0:
             volumes = list(range(q_min, q_max + 1, q_step))
 
@@ -276,13 +262,9 @@ R$ {lucro:,.2f}
                     "Receita Total": [preco * q for q in volumes],
                     "Gasto Variável Total": [gasto_var * q for q in volumes],
                     "Gasto Fixo Total": [gastos_fixos for _ in volumes],
-                    "Lucro": [
-                        (preco - gasto_var) * q - gastos_fixos for q in volumes
-                    ],
+                    "Lucro": [(preco - gasto_var) * q - gastos_fixos for q in volumes],
                     "GV Unitário": [gasto_variavel_unitario for _ in volumes],
-                    "GF Unitário": [
-                        (gastos_fixos / q) if q > 0 else None for q in volumes
-                    ],
+                    "GF Unitário": [(gastos_fixos / q) if q > 0 else None for q in volumes],
                     "Gasto Unitário Total": [
                         gasto_variavel_unitario + ((gastos_fixos / q) if q > 0 else 0)
                         for q in volumes
@@ -295,9 +277,9 @@ R$ {lucro:,.2f}
 
         st.caption("LABCOST – Uso educacional. Modo: Produto único.")
 
-    # ----------------------------------------------------
+    # -----------------------------------------------------
     # MODO 2 – MIX DE PRODUTOS
-    # ----------------------------------------------------
+    # -----------------------------------------------------
     else:
         st.subheader("Modo: Mix de produtos")
 
@@ -305,9 +287,9 @@ R$ {lucro:,.2f}
 
         gastos_fixos_mix = st.sidebar.number_input(
             "Gastos fixos totais (R$) – comuns a todos os produtos",
-            0.0,
-            1000000.0,
-            50000.0,
+            min_value=0.0,
+            max_value=1000000.0,
+            value=50000.0,
         )
 
         num_produtos = st.sidebar.slider(
@@ -340,25 +322,25 @@ R$ {lucro:,.2f}
             with col2:
                 preco_i = st.number_input(
                     f"Preço venda {i+1} (R$)",
-                    0.0,
-                    100000.0,
-                    100.0 + 10 * i,
+                    min_value=0.0,
+                    max_value=100000.0,
+                    value=100.0 + 10 * i,
                     key=f"preco_{i}",
                 )
             with col3:
                 gv_i = st.number_input(
                     f"Gasto variável {i+1} (R$)",
-                    0.0,
-                    100000.0,
-                    40.0 + 5 * i,
+                    min_value=0.0,
+                    max_value=100000.0,
+                    value=40.0 + 5 * i,
                     key=f"gv_{i}",
                 )
             with col4:
                 q_i = st.number_input(
                     f"Volume esperado {i+1} (unid.)",
-                    0,
-                    1000000,
-                    100,
+                    min_value=0,
+                    max_value=1000000,
+                    value=1000,
                     key=f"q_{i}",
                 )
 
@@ -374,9 +356,7 @@ R$ {lucro:,.2f}
         soma_q = sum(p["Q"] for p in produtos)
 
         if soma_q == 0:
-            st.warning(
-                "Informe volumes de vendas **maiores que zero** para calcular o mix e o ponto de equilíbrio."
-            )
+            st.warning("Informe volumes de vendas maiores que zero para calcular o mix.")
         else:
             linhas = []
             mc_mix_ponderada = 0.0
@@ -415,10 +395,10 @@ R$ {lucro:,.2f}
             if mc_mix_ponderada > 0:
                 pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
             else:
-                pe_mix_unidades = 0.0
+                pe_mix_unidades = 0
 
             for linha in linhas:
-                mix_frac = linha["Mix (%)"] / 100.0
+                mix_frac = linha["Mix (%)"] / 100
                 linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
 
             lucro_total = mc_total - gastos_fixos_mix
@@ -468,31 +448,39 @@ R$ {lucro:,.2f}
                 """
             )
 
-            # ---------- GRÁFICO: PE POR PRODUTO --------------
-            if "PE (unid.) no mix" in df_mix.columns:
-                df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
-                df_pe = df_pe.set_index("Produto")
+            # --------- GRÁFICO DO PE POR PRODUTO (ALTAIR) ----------
+            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
+            df_pe.rename(columns={"PE (unid.) no mix": "PE_unid"}, inplace=True)
 
+            # garantir numérico
+            df_pe["PE_unid"] = pd.to_numeric(df_pe["PE_unid"], errors="coerce").fillna(0)
+
+            if (df_pe["PE_unid"] > 0).any():
                 st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
-                st.bar_chart(df_pe)
 
-                # Tabela de apoio para você ver os valores que estão indo para o gráfico
-                st.write("Tabela de apoio – PE por produto (valores plotados no gráfico):")
-                st.dataframe(df_pe)
-
-                if (df_pe["PE (unid.) no mix"] <= 0).all():
-                    st.warning(
-                        "Todos os valores de PE ficaram **zero ou negativos**. "
-                        "Isso acontece quando a **margem de contribuição média ponderada do mix "
-                        "é menor ou igual a zero** ou quando os **gastos fixos são zero**. "
-                        "Ajuste preços, gastos variáveis ou volumes para gerar uma MC positiva."
+                chart = (
+                    alt.Chart(df_pe)
+                    .mark_bar()
+                    .encode(
+                        x=alt.X("Produto:N", title="Produto"),
+                        y=alt.Y("PE_unid:Q", title="PE (unidades)"),
+                        tooltip=["Produto", alt.Tooltip("PE_unid:Q", title="PE (unid.)")],
                     )
+                    .properties(height=400)
+                )
 
-            st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+                st.altair_chart(chart, use_container_width=True)
+            else:
+                st.info(
+                    "Os valores de PE por produto são zero. Ajuste os parâmetros do mix "
+                    "ou dos gastos fixos para visualizar o gráfico."
+                )
 
-# ========================================================
+        st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+
+# =========================================================
 # TAB 2 – CLASSIFICAÇÃO DE GASTOS
-# ========================================================
+# =========================================================
 with tab_classificacao:
     st.title("Classificação de Gastos: Custos x Despesas e Detalhamento")
 
@@ -665,4 +653,5 @@ with tab_classificacao:
             "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
+
 
