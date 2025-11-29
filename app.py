@@ -658,4 +658,175 @@ with tab_classificacao:
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
 
+# =========================================================
+# TAB 3 – PLANILHA DE MARK-UP
+# =========================================================
+with tab_markup:
+    st.title("Planilha de Mark-up de Preço de Venda")
+
+    st.write(
+        """
+        Esta planilha permite calcular o **preço de venda** a partir do **custo unitário**
+        e dos **percentuais incidentes sobre o preço de venda (PV)**, como impostos,
+        comissões, despesas e margem de lucro desejada.
+
+        A lógica é a mesma das planilhas clássicas de **Mark-up** usadas em Contabilidade
+        de Custos / Formação de Preços.
+        """
+    )
+
+    st.markdown("---")
+
+    col_esq, col_dir = st.columns([1, 1.1])
+
+    # ---------------- ENTRADAS ----------------
+    with col_esq:
+        st.subheader("Entradas")
+
+        custo_unitario = st.number_input(
+            "Custo unitário (R$)",
+            min_value=0.0,
+            value=100.0,
+            step=1.0,
+            format="%.2f",
+        )
+
+        st.markdown("#### Percentuais sobre o **Preço de Venda (PV)**")
+
+        impostos_perc = st.number_input(
+            "Impostos sobre vendas (% do PV)",
+            min_value=0.0,
+            max_value=100.0,
+            value=18.0,
+            step=0.5,
+            format="%.2f",
+        )
+        comissao_perc = st.number_input(
+            "Comissão / taxas de venda (% do PV)",
+            min_value=0.0,
+            max_value=100.0,
+            value=5.0,
+            step=0.5,
+            format="%.2f",
+        )
+        despesas_perc = st.number_input(
+            "Despesas fixas / administrativas rateadas (% do PV)",
+            min_value=0.0,
+            max_value=100.0,
+            value=10.0,
+            step=0.5,
+            format="%.2f",
+        )
+        outros_perc = st.number_input(
+            "Outros encargos sobre o PV (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=0.0,
+            step=0.5,
+            format="%.2f",
+        )
+        lucro_perc = st.number_input(
+            "Lucro desejado (% do PV)",
+            min_value=0.0,
+            max_value=100.0,
+            value=15.0,
+            step=0.5,
+            format="%.2f",
+        )
+
+    # ---------------- CÁLCULO DO MARK-UP ----------------
+    with col_dir:
+        st.subheader("Cálculo do Mark-up")
+
+        soma_perc_sobre_pv = (
+            impostos_perc
+            + comissao_perc
+            + despesas_perc
+            + outros_perc
+            + lucro_perc
+        ) / 100.0
+
+        if soma_perc_sobre_pv >= 1:
+            st.error(
+                "A soma dos percentuais sobre o preço de venda é maior ou igual a **100%**. "
+                "Não é possível calcular o Mark-up. Reduza algum percentual."
+            )
+            preco_venda = 0.0
+            fator_markup = 0.0
+        else:
+            # Fórmula clássica do Mark-up:
+            # Mark-up = 1 / (1 - % sobre PV)
+            fator_markup = 1 / (1 - soma_perc_sobre_pv) if custo_unitario > 0 else 0
+            preco_venda = custo_unitario * fator_markup
+
+            st.metric("Fator de Mark-up", f"{fator_markup:,.4f}")
+            st.metric("Preço de venda sugerido (PV)", f"R$ {preco_venda:,.2f}")
+
+        st.markdown("---")
+
+        # ---------------- PLANILHA RESUMO ----------------
+        st.subheader("Planilha-resumo em formato de tabela")
+
+        if preco_venda > 0:
+            valor_impostos = preco_venda * impostos_perc / 100
+            valor_comissao = preco_venda * comissao_perc / 100
+            valor_despesas = preco_venda * despesas_perc / 100
+            valor_outros = preco_venda * outros_perc / 100
+            valor_lucro = preco_venda * lucro_perc / 100
+
+            dados_tabela = [
+                {
+                    "Componente": "Custo unitário",
+                    "% sobre PV": "",
+                    "Valor (R$)": custo_unitario,
+                },
+                {
+                    "Componente": "Impostos sobre vendas",
+                    "% sobre PV": f"{impostos_perc:.2f} %",
+                    "Valor (R$)": valor_impostos,
+                },
+                {
+                    "Componente": "Comissões / taxas de venda",
+                    "% sobre PV": f"{comissao_perc:.2f} %",
+                    "Valor (R$)": valor_comissao,
+                },
+                {
+                    "Componente": "Despesas fixas / administrativas",
+                    "% sobre PV": f"{despesas_perc:.2f} %",
+                    "Valor (R$)": valor_despesas,
+                },
+                {
+                    "Componente": "Outros encargos",
+                    "% sobre PV": f"{outros_perc:.2f} %",
+                    "Valor (R$)": valor_outros,
+                },
+                {
+                    "Componente": "Lucro desejado",
+                    "% sobre PV": f"{lucro_perc:.2f} %",
+                    "Valor (R$)": valor_lucro,
+                },
+                {
+                    "Componente": "Preço de venda (PV)",
+                    "% sobre PV": "100,00 %",
+                    "Valor (R$)": preco_venda,
+                },
+            ]
+
+            df_markup = pd.DataFrame(dados_tabela)
+
+            st.dataframe(
+                df_markup.style.format({"Valor (R$)": "R$ {:,.2f}"}),
+                use_container_width=True,
+            )
+        else:
+            st.info(
+                "Informe os dados na coluna da esquerda para calcular o Mark-up "
+                "e gerar a planilha-resumo."
+            )
+
+    st.markdown("---")
+    st.caption(
+        "Planilha de Mark-up integrada ao LABCOST – uso educacional na disciplina de "
+        "Contabilidade de Custos e Gestão (UnB / NEPECON)."
+    )
 
