@@ -41,6 +41,7 @@ with tab_home:
             como parte das iniciativas do projeto de Extensão **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
             Econômica e Socioambiental**. 
             Contato: nepeconunb@gmail.com
+            Youtube: https://www.youtube.com/channel/UCu55I4Qpp2nBYWu5-qftkZw/videos
 
             O **LABCOST** é um laboratório virtual para apoiar o ensino de **Contabilidade de Custos e Gestão**, com foco em:
 
