@@ -107,10 +107,10 @@ with tab_home:
     st.subheader("Sugestão de uso didático")
     st.markdown(
         """
-        - Proponha **cenários diferentes** (ex.: aumento de preço, redução de gastos fixos, 
-          mudanças no mix de produtos) e peça para os alunos analisarem o impacto no **ponto de equilíbrio** e no **lucro**.  
-        - Use o LABCOST em **aulas práticas de laboratório** ou em **atividades remotas**.  
-        - Combine com leituras sobre **margem de contribuição**, **decisão de mix de produtos** e **GAO**.  
+        - Propor **cenários diferentes** (ex.: aumento de preço, redução de gastos fixos, 
+          mudanças no mix de produtos) e pedir aos alunos que analisem o impacto no **ponto de equilíbrio** e no **lucro**.  
+        - Usar o LABCOST em **aulas práticas de laboratório** ou em **atividades remotas**.  
+        - Combinar com leituras sobre **margem de contribuição**, **decisão de mix de produtos** e **GAO**.  
         """
     )
 
@@ -251,7 +251,7 @@ with tab_simulador:
         st.subheader("Grau de Alavancagem Operacional (GAO)")
         st.write(f"GAO: **{gao:,.2f}**")
 
-        if gao > 0 and gao < 2:
+        if 0 < gao < 2:
             st.info("GAO baixo: o lucro é pouco sensível às variações no volume de vendas.")
         elif 2 <= gao < 5:
             st.warning("GAO moderado: há risco moderado e bom potencial de retorno.")
@@ -304,7 +304,7 @@ with tab_simulador:
             50000.0,
         )
 
-        # AGORA ATÉ 10 PRODUTOS
+        # ATÉ 10 PRODUTOS
         num_produtos = st.sidebar.slider(
             "Número de produtos no mix", min_value=2, max_value=10, value=3
         )
@@ -465,7 +465,7 @@ with tab_simulador:
                 ### 📌 Cálculo do Ponto de Equilíbrio do Mix
 
                 - MC unitária média ponderada do mix (R$/unidade):  
-                  MC_mix = soma da (MC_unitária de cada produto × participação no mix em unidades).  
+                  MC_mix = soma das margens de contribuição unitárias ponderadas pelo mix em unidades.  
 
                 - Ponto de equilíbrio do mix em unidades totais:  
                   PE_mix (unidades) = Gastos fixos totais / MC_mix  
@@ -488,8 +488,19 @@ with tab_simulador:
 
             # Gráfico de PE por produto
             st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
-            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].set_index("Produto")
-            st.bar_chart(df_pe)
+
+            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].copy()
+            df_pe = df_pe.set_index("Produto")
+
+            if df_pe["PE (unid.) no mix"].sum() <= 0:
+                st.warning(
+                    "O ponto de equilíbrio do mix ficou zero ou negativo. "
+                    "Verifique se os **preços de venda são maiores que os gastos variáveis** "
+                    "e se os **gastos fixos totais** são positivos."
+                )
+                st.dataframe(df_pe, use_container_width=True)
+            else:
+                st.bar_chart(df_pe)
 
         st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
@@ -655,4 +666,16 @@ with tab_classificacao:
         df_result = pd.DataFrame(resultados)
         st.subheader("Resultado da Atividade")
         st.write(f"Acertos no **tipo (Custo/Despesa)**: **{acertos_tipo} de {len(itens)}**")
+        st.write(
+            f"Acertos na **classificação detalhada**: **{acertos_class} de {len(itens)}**"
+        )
+        st.write(
+            f"Itens com **tipo e classificação corretos ao mesmo tempo**: **{acertos_totais} de {len(itens)}**"
+        )
+        st.dataframe(df_result, use_container_width=True)
 
+        st.info(
+            "Sugestão didática: discuta com os alunos os itens em que houve erro, "
+            "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
+            "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
+        )
