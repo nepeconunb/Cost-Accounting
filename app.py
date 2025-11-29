@@ -20,7 +20,7 @@ tab_home, tab_simulador, tab_classificacao = st.tabs(
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
-    # ---- LOGO (opcional, sem aviso chato) ----
+    # ---- LOGO (opcional) ----
     with col_logo:
         logo_path = Path("labcost_logo.svg")
         if logo_path.exists():
@@ -304,7 +304,7 @@ with tab_simulador:
             50000.0,
         )
 
-        # ATÉ 10 PRODUTOS NO MIX
+        # AGORA ATÉ 10 PRODUTOS
         num_produtos = st.sidebar.slider(
             "Número de produtos no mix", min_value=2, max_value=10, value=3
         )
@@ -390,7 +390,6 @@ with tab_simulador:
                 gv_total += gv_i_total
                 mc_total += mc_i_total
 
-                # MC unitária ponderada pelo mix (em unidades)
                 mc_mix_ponderada += mc_unit_i * mix_i
 
                 linhas.append(
@@ -407,19 +406,18 @@ with tab_simulador:
                     }
                 )
 
-            # ----------------- PONTO DE EQUILÍBRIO DO MIX -----------------
+            # Ponto de equilíbrio do mix (em unidades totais)
             if mc_mix_ponderada > 0:
-                # PE em unidades totais do mix
                 pe_mix_unidades = gastos_fixos_mix / mc_mix_ponderada
             else:
                 pe_mix_unidades = 0
 
-            # PE de cada produto (em unidades), mantendo o mix
+            # PE de cada produto em unidades
             for linha in linhas:
                 mix_frac = linha["Mix (%)"] / 100
                 linha["PE (unid.) no mix"] = pe_mix_unidades * mix_frac
 
-            # PE em receita total do mix
+            # PE do mix em receita total
             pe_mix_receita = sum(
                 linha["PE (unid.) no mix"] * linha["Preço (R$)"] for linha in linhas
             )
@@ -461,20 +459,24 @@ with tab_simulador:
                     f"R$ {mc_mix_ponderada:,.2f}",
                 )
 
+            # Explicação do PE do mix + valores numéricos
             st.markdown(
-                f"""
+                """
                 ### 📌 Cálculo do Ponto de Equilíbrio do Mix
 
-                - **MC unitária média ponderada do mix (R$/unidade):**  
-                  \\( MC_{{mix}} = \\sum [MC_{{unitária,i}} \\times (Q_i / Q_{{total}})] \\)  
+                - MC unitária média ponderada do mix (R$/unidade):  
+                  MC_mix = soma da (MC_unitária de cada produto × participação no mix em unidades).  
 
-                - **Ponto de equilíbrio do mix em unidades totais:**  
-                  \\( PE_{{mix, unid.}} = \\dfrac{{Gastos\\ fixos\\ totais}}{{MC_{{mix}}}} \\)  
-
-                - **Resultado numérico:**  
-                  • PE do mix (unidades totais): **{pe_mix_unidades:,.0f} unid.**  
-                  • PE do mix (receita total): **R$ {pe_mix_receita:,.2f}**
+                - Ponto de equilíbrio do mix em unidades totais:  
+                  PE_mix (unidades) = Gastos fixos totais / MC_mix  
                 """
+            )
+
+            st.markdown(
+                "• PE do mix (unidades totais): **{:,.0f} unid.**  \n"
+                "• PE do mix (receita total): **R$ {:,.2f}**".format(
+                    pe_mix_unidades, pe_mix_receita
+                )
             )
 
             st.markdown(
@@ -484,9 +486,8 @@ with tab_simulador:
                 """
             )
 
-            # --------- GRÁFICO DO PONTO DE EQUILÍBRIO POR PRODUTO ---------
+            # Gráfico de PE por produto
             st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
-
             df_pe = df_mix[["Produto", "PE (unid.) no mix"]].set_index("Produto")
             st.bar_chart(df_pe)
 
@@ -654,16 +655,4 @@ with tab_classificacao:
         df_result = pd.DataFrame(resultados)
         st.subheader("Resultado da Atividade")
         st.write(f"Acertos no **tipo (Custo/Despesa)**: **{acertos_tipo} de {len(itens)}**")
-        st.write(
-            f"Acertos na **classificação detalhada**: **{acertos_class} de {len(itens)}**"
-        )
-        st.write(
-            f"Itens com **tipo e classificação corretos ao mesmo tempo**: **{acertos_totais} de {len(itens)}**"
-        )
-        st.dataframe(df_result, use_container_width=True)
 
-        st.info(
-            "Sugestão didática: discuta com os alunos os itens em que houve erro, "
-            "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
-            "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
-        )
