@@ -36,9 +36,9 @@ with tab_home:
             """
             **LABCOST – Laboratório de Simulação de Gastos e Custos**  
 
-            Este simulador é utilizado na disciplina de **Contabilidade de Custos e Gestão**,
+            Este simulador é utilizado na disciplina de **Contabilidade de Custos**,
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
-            como parte das iniciativas do **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
+            como parte das iniciativas do projeto de Extensão **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
             Econômica e Socioambiental**.
 
             O **LABCOST** é um laboratório virtual para apoiar o ensino de **Contabilidade de Custos e Gestão**, com foco em:
