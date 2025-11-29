@@ -434,4 +434,236 @@ with tab_simulador:
                     {
                         "Preço (R$)": "R$ {:,.2f}",
                         "Gasto Var. unit. (R$)": "R$ {:,.2f}",
+                        "MC unit. (R$)": "R$ {:,.2f}",
+                        "Receita (R$)": "R$ {:,.2f}",
+                        "Gasto Var. Total (R$)": "R$ {:,.2f}",
+                        "MC Total (R$)": "R$ {:,.2f}",
+                        "Mix (%)": "{:,.1f}%",
+                        "PE (unid.) no mix": "{:,.0f}",
+                    }
+                ),
+                use_container_width=True,
+            )
 
+            st.subheader("Indicadores do Mix")
+
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Receita total", f"R$ {receita_total:,.2f}")
+                st.metric("Gasto variável total", f"R$ {gv_total:,.2f}")
+            with col_b:
+                st.metric("Margem de contribuição total", f"R$ {mc_total:,.2f}")
+                st.metric("Gastos fixos totais", f"R$ {gastos_fixos_mix:,.2f}")
+            with col_c:
+                st.metric("Lucro operacional", f"R$ {lucro_total:,.2f}")
+                st.metric(
+                    "MC unitária média ponderada do mix",
+                    f"R$ {mc_mix_ponderada:,.2f}",
+                )
+
+            st.markdown(
+                f"""
+                ### 📌 Cálculo do Ponto de Equilíbrio do Mix
+
+                - **MC unitária média ponderada do mix (R$/unidade):**  
+                  \\( MC_{{mix}} = \\sum [MC_{{unitária,i}} \\times (Q_i / Q_{{total}})] \\)  
+
+                - **Ponto de equilíbrio do mix em unidades totais:**  
+                  \\( PE_{{mix, unid.}} = \\dfrac{{Gastos\\ fixos\\ totais}}{{MC_{{mix}}}} \\)  
+
+                - **Resultado numérico:**  
+                  • PE do mix (unidades totais): **{pe_mix_unidades:,.0f} unid.**  
+                  • PE do mix (receita total): **R$ {pe_mix_receita:,.2f}**
+                """
+            )
+
+            st.markdown(
+                """
+                A tabela acima mostra, na coluna **"PE (unid.) no mix"**, quantas unidades de cada produto
+                precisam ser vendidas **no ponto de equilíbrio**, mantendo o mix informado.
+                """
+            )
+
+            # --------- GRÁFICO DO PONTO DE EQUILÍBRIO POR PRODUTO ---------
+            st.subheader("Gráfico do Ponto de Equilíbrio por produto (unidades)")
+
+            df_pe = df_mix[["Produto", "PE (unid.) no mix"]].set_index("Produto")
+            st.bar_chart(df_pe)
+
+        st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
+
+# =========================================================
+# TAB 2 – CLASSIFICAÇÃO DE GASTOS
+# =========================================================
+with tab_classificacao:
+    st.title("Classificação de Gastos: Custos x Despesas e Detalhamento")
+
+    st.write(
+        """
+        Nesta atividade, o aluno deve **classificar os gastos** em:
+        - **Custo** ou **Despesa**;  
+        - E também indicar a **classificação detalhada**, escolhendo uma das opções:
+
+        - Custo Direto  
+        - Custo Indireto  
+        - Custo Fixo  
+        - Custo Variável  
+        - Despesa Fixa  
+        - Despesa Variável  
+        - Despesa Administrativa  
+        - Despesa com Vendas  
+        - Despesa Financeira  
+        """
+    )
+
+    itens = [
+        {
+            "descricao": "Salário da mão de obra diretamente envolvida na produção.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Direto",
+        },
+        {
+            "descricao": "Matéria-prima utilizada na fabricação do produto.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Direto",
+        },
+        {
+            "descricao": "Aluguel do prédio da fábrica.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Fixo",
+        },
+        {
+            "descricao": "Energia elétrica das máquinas na fábrica (varia com a produção).",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Variável",
+        },
+        {
+            "descricao": "Depreciação das máquinas utilizadas na produção.",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Indireto",
+        },
+        {
+            "descricao": "Comissão dos vendedores sobre as vendas realizadas.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Variável",
+        },
+        {
+            "descricao": "Salário fixo da equipe de vendas.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa com Vendas",
+        },
+        {
+            "descricao": "Salário da equipe administrativa do escritório central.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Administrativa",
+        },
+        {
+            "descricao": "Gastos com propaganda e publicidade.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa com Vendas",
+        },
+        {
+            "descricao": "Juros pagos sobre empréstimos bancários.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Financeira",
+        },
+        {
+            "descricao": "Seguro das instalações da fábrica (valor fixo anual).",
+            "tipo_correto": "Custo",
+            "classificacao_correta": "Custo Fixo",
+        },
+        {
+            "descricao": "Telefone e internet do escritório administrativo.",
+            "tipo_correto": "Despesa",
+            "classificacao_correta": "Despesa Administrativa",
+        },
+    ]
+
+    opcoes_tipo = ["Custo", "Despesa"]
+    opcoes_classificacao = [
+        "Custo Direto",
+        "Custo Indireto",
+        "Custo Fixo",
+        "Custo Variável",
+        "Despesa Fixa",
+        "Despesa Variável",
+        "Despesa Administrativa",
+        "Despesa com Vendas",
+        "Despesa Financeira",
+    ]
+
+    st.subheader("Atividade")
+    st.write(
+        "Para cada item abaixo, selecione **se é Custo ou Despesa** e a **classificação detalhada**."
+    )
+
+    respostas_tipo = []
+    respostas_classificacao = []
+
+    for i, item in enumerate(itens):
+        st.markdown(f"**Item {i+1}:** {item['descricao']}")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            tipo_escolhido = st.selectbox(
+                "Custo ou Despesa?",
+                opcoes_tipo,
+                key=f"tipo_{i}",
+            )
+        with col2:
+            classificacao_escolhida = st.selectbox(
+                "Classificação detalhada",
+                opcoes_classificacao,
+                key=f"class_{i}",
+            )
+
+        respostas_tipo.append(tipo_escolhido)
+        respostas_classificacao.append(classificacao_escolhida)
+        st.markdown("---")
+
+    if st.button("Corrigir respostas"):
+        resultados = []
+        acertos_tipo = 0
+        acertos_class = 0
+        acertos_totais = 0
+
+        for i, item in enumerate(itens):
+            tipo_ok = respostas_tipo[i] == item["tipo_correto"]
+            class_ok = respostas_classificacao[i] == item["classificacao_correta"]
+            acertou_tudo = tipo_ok and class_ok
+
+            if tipo_ok:
+                acertos_tipo += 1
+            if class_ok:
+                acertos_class += 1
+            if acertou_tudo:
+                acertos_totais += 1
+
+            resultados.append(
+                {
+                    "Item": i + 1,
+                    "Descrição": item["descricao"],
+                    "Tipo marcado": respostas_tipo[i],
+                    "Tipo correto": item["tipo_correto"],
+                    "Classificação marcada": respostas_classificacao[i],
+                    "Classificação correta": item["classificacao_correta"],
+                    "Acertou tipo e class.?": "Sim" if acertou_tudo else "Não",
+                }
+            )
+
+        df_result = pd.DataFrame(resultados)
+        st.subheader("Resultado da Atividade")
+        st.write(f"Acertos no **tipo (Custo/Despesa)**: **{acertos_tipo} de {len(itens)}**")
+        st.write(
+            f"Acertos na **classificação detalhada**: **{acertos_class} de {len(itens)}**"
+        )
+        st.write(
+            f"Itens com **tipo e classificação corretos ao mesmo tempo**: **{acertos_totais} de {len(itens)}**"
+        )
+        st.dataframe(df_result, use_container_width=True)
+
+        st.info(
+            "Sugestão didática: discuta com os alunos os itens em que houve erro, "
+            "reforçando a diferença entre **custos diretos/indiretos/fixos/variáveis** "
+            "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
+        )
