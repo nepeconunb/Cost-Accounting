@@ -7,7 +7,7 @@ import altair as alt
 # CONFIGURAÇÃO DA PÁGINA
 # --------------------------------------------------------
 st.set_page_config(
-    page_title="LABCOST – Simulador de Gastos e Custos",
+    page_title="LABCOST – Custo/Volume/Lucro",
     page_icon="📊",
     layout="wide",
 )
