@@ -17,6 +17,8 @@ tab_home, tab_simulador, tab_classificacao, tab_markup = st.tabs(
         "💻 Simulador de Gastos e Custos",
         "📚 Classificação de Gastos",
         "🧾 Mark-up de Preço"
+        with tab_inventario:
+    inventario_produtos()
     ]
 )
 
@@ -891,4 +893,131 @@ with tab_markup:
         "Contabilidade de Custos e Gestão (UnB / NEPECON), com métodos de "
         "custeio variável e custeio por absorção."
     )
+def inventario_produtos():
+    import pandas as pd
+    import streamlit as st
+
+    st.header("📚 Livro de Inventário de Produtos – Custo Médio Ponderado")
+
+    st.markdown(
+        """
+        Este módulo permite montar um **Livro de Inventário simplificado**, por produto,
+        utilizando o **método do custo médio ponderado**.
+
+        Para cada produto, informe:
+
+        - **Estoque inicial**: quantidade e custo unitário (CTu);
+        - **Compras / Produção no período**: quantidade e custo unitário;
+        - **Vendas no período**: quantidade vendida.
+
+        O sistema calcula automaticamente:
+
+        - Custo total disponível para venda;
+        - Custo médio unitário (CTu médio);
+        - **CMV – Custo das Mercadorias Vendidas**;
+        - **Estoque final** em quantidade e valor.
+        """
+    )
+
+    # Quantos produtos haverá no inventário
+    n_produtos = st.number_input(
+        "Quantidade de produtos no inventário",
+        min_value=1,
+        max_value=50,
+        value=3,
+        step=1,
+    )
+
+    # Dados padrão para facilitar o preenchimento
+    dados_iniciais = {
+        "Produto": [f"Produto {i+1}" for i in range(int(n_produtos))],
+        "Estoque inicial (Qtd)": [0.0] * int(n_produtos),
+        "Estoque inicial (CTu)": [0.0] * int(n_produtos),
+        "Compras / Produção (Qtd)": [0.0] * int(n_produtos),
+        "Compras / Produção (CTu)": [0.0] * int(n_produtos),
+        "Vendas no período (Qtd)": [0.0] * int(n_produtos),
+    }
+
+    df = pd.DataFrame(dados_iniciais)
+
+    st.write("### ✏️ Informe os dados do inventário")
+    df_editado = st.data_editor(
+        df,
+        num_rows="fixed",
+        use_container_width=True,
+    )
+
+    # Copia para começar os cálculos
+    resultado = df_editado.copy()
+
+    # Custo do estoque inicial e das compras
+    resultado["Custo EI (R$)"] = (
+        resultado["Estoque inicial (Qtd)"] * resultado["Estoque inicial (CTu)"]
+    )
+    resultado["Custo Compras (R$)"] = (
+        resultado["Compras / Produção (Qtd)"] * resultado["Compras / Produção (CTu)"]
+    )
+
+    # Quantidade e custo total disponíveis para venda
+    resultado["Qtd disponível"] = (
+        resultado["Estoque inicial (Qtd)"] + resultado["Compras / Produção (Qtd)"]
+    )
+    resultado["Custo total disponível (R$)"] = (
+        resultado["Custo EI (R$)"] + resultado["Custo Compras (R$)"]
+    )
+
+    # Custo médio unitário (evitar divisão por zero)
+    def calcula_ctu_medio(row):
+        if row["Qtd disponível"] > 0:
+            return row["Custo total disponível (R$)"] / row["Qtd disponível"]
+        return 0.0
+
+    resultado["CTu médio (R$)"] = resultado.apply(calcula_ctu_medio, axis=1)
+
+    # CMV e estoque final
+    resultado["CMV (R$)"] = resultado["Vendas no período (Qtd)"] * resultado["CTu médio (R$)"]
+    resultado["Estoque final (Qtd)"] = (
+        resultado["Qtd disponível"] - resultado["Vendas no período (Qtd)"]
+    )
+    resultado["Estoque final (R$)"] = (
+        resultado["Estoque final (Qtd)"] * resultado["CTu médio (R$)"]
+    )
+
+    st.write("### ✅ Resultado do Livro de Inventário (por produto)")
+    st.dataframe(
+        resultado[
+            [
+                "Produto",
+                "Estoque inicial (Qtd)",
+                "Estoque inicial (CTu)",
+                "Compras / Produção (Qtd)",
+                "Compras / Produção (CTu)",
+                "Vendas no período (Qtd)",
+                "Qtd disponível",
+                "Custo total disponível (R$)",
+                "CTu médio (R$)",
+                "CMV (R$)",
+                "Estoque final (Qtd)",
+                "Estoque final (R$)",
+            ]
+        ],
+        use_container_width=True,
+    )
+
+    # Totais gerais do período
+    total_cmv = float(resultado["CMV (R$)"].sum())
+    total_estoque_final = float(resultado["Estoque final (R$)"].sum())
+
+    st.write("### 📌 Totais do período")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(
+            "CMV total (R$)",
+            f"{total_cmv:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+        )
+    with col2:
+        st.metric(
+            "Valor total do estoque final (R$)",
+            f"{total_estoque_final:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+        )
 
