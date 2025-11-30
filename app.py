@@ -1280,30 +1280,51 @@ with tab_avaliacao:
     st.write(
         """
         Ajude a melhorar o **LABCOST**!  
-        Responda rapidamente à avaliação abaixo.
+        Preencha rapidamente a avaliação abaixo.
         """
     )
 
     with st.form("form_avaliacao"):
         nome = st.text_input("Nome (opcional)")
-        polo = st.text_input("Polo / Turma (opcional)")
+        email = st.text_input("E-mail (opcional)")
+        
+        col_a, col_b = st.columns(2)
+        with col_a:
+            cidade = st.text_input("Cidade (opcional)")
+        with col_b:
+            estado = st.text_input("Estado (opcional)")
+        
+        tipo_usuario = st.selectbox(
+            "Você é:",
+            [
+                "Estudante",
+                "Professor",
+                "Profissional da área contábil",
+                "Outro"
+            ]
+        )
+
         nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
         facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
         utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
-        comentario = st.text_area("Comentários e sugestões")
+        comentario = st.text_area("Comentários e sugestões (opcional)")
 
         enviar = st.form_submit_button("Enviar avaliação")
 
     if enviar:
         st.success("Obrigado pela sua avaliação! 🙌")
-        st.write("**Resumo da sua resposta:**")
+        st.write("### Resumo da sua resposta:")
         st.write(
             {
                 "Nome": nome,
-                "Polo/Turma": polo,
+                "E-mail": email,
+                "Cidade": cidade,
+                "Estado": estado,
+                "Tipo de usuário": tipo_usuario,
                 "Nota geral": nota_geral,
                 "Facilidade": facilidade,
                 "Utilidade": utilidade,
                 "Comentário": comentario,
             }
         )
+
