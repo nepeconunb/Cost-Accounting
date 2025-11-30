@@ -1272,7 +1272,7 @@ with tab_inventario:
     inventario_produtos()
 
 # ========================================================
-# TAB 5 – AVALIAÇÃO DO SISTEMA
+# TAB 5 – AVALIAÇÃO DO SISTEMA (Dashboard)
 # ========================================================
 with tab_avaliacao:
     st.title("⭐ Avaliação do LABCOST")
@@ -1280,73 +1280,70 @@ with tab_avaliacao:
     st.write(
         """
         Ajude a melhorar o **LABCOST**!  
-        Preencha rapidamente a avaliação abaixo.
+        Preencha rapidamente a avaliação abaixo e veja o painel com os resultados.
         """
     )
 
-    # Caminho do arquivo CSV onde as avaliações serão guardadas
+    # Arquivo CSV onde as avaliações serão guardadas
     csv_path = Path("avaliacoes_labcost.csv")
 
-    # Lista de Estados (UF)
-    ufs_brasil = [
-        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES",
-        "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR",
-        "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
-        "SP", "SE", "TO",
+    # Lista de estados (UF)
+    lista_estados = [
+        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+        "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+        "SP", "SE", "TO", "Outro/Exterior"
     ]
 
     # ---------------- FORMULÁRIO DE AVALIAÇÃO ----------------
     with st.form("form_avaliacao"):
 
-        estado = st.selectbox(
-            "Estado (UF)",
-            ["Não informado"] + ufs_brasil,
-        )
+        col_loc, col_tipo = st.columns(2)
+        with col_loc:
+            estado = st.selectbox(
+                "Em qual estado (UF) você está?",
+                options=lista_estados,
+                index=lista_estados.index("DF") if "DF" in lista_estados else 0,
+            )
 
-        tipo_usuario = st.selectbox(
-            "Você é:",
-            [
-                "Estudante",
-                "Professor",
-                "Profissional da área contábil",
-                "Outro",
-            ],
-        )
+        with col_tipo:
+            tipo_usuario = st.selectbox(
+                "Você é:",
+                [
+                    "Estudante",
+                    "Professor",
+                    "Profissional da área contábil",
+                    "Outro",
+                ],
+            )
 
-        nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
-        facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
-        utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
+        col_notas = st.columns(3)
+        with col_notas[0]:
+            nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
+        with col_notas[1]:
+            facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
+        with col_notas[2]:
+            utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
 
         palavra_labcost = st.selectbox(
-    "Como você define o LABCOST?",
-    [
-        "Excelente",
-        "Ótimo",
-        "Bom",
-        "Regular",
-        "Confuso",
-        "Difícil"
-    ]
-)
-
+            "Em **uma palavra**, como você define o LABCOST?",
+            [
+                "Excelente",
+                "Ótimo",
+                "Bom",
+                "Regular",
+                "Confuso",
+                "Difícil",
+            ],
+        )
 
         enviar = st.form_submit_button("Enviar avaliação")
 
     # ---- TRATAMENTO DO ENVIO ----
     if enviar:
-        # Apenas uma palavra
-        palavra_labcost = (
-            palavra_labcost_bruta.strip().split()[0].lower()
-            if palavra_labcost_bruta.strip()
-            else ""
-        )
-
-        # Normaliza Estado
-        estado_salvo = "" if estado == "Não informado" else estado.upper()
-
-        # Registro final (SEM nome e email)
+        # Registro da resposta (sem nome, e-mail, cidade)
         resposta = {
-            "Estado": estado_salvo,
+            "Data_hora": datetime.now().isoformat(timespec="seconds"),
+            "Estado": estado,
             "Tipo de usuário": tipo_usuario,
             "Nota geral": nota_geral,
             "Facilidade": facilidade,
@@ -1354,14 +1351,9 @@ with tab_avaliacao:
             "Palavra_LABCOST": palavra_labcost,
         }
 
-        # Carrega e limpa o CSV antigo (se tiver colunas antigas)
+        # Se já existir, carrega e acrescenta; senão, cria novo
         if csv_path.exists():
             df_existente = pd.read_csv(csv_path)
-
-            # Remove colunas antigas automaticamente
-            colunas_permitidas = list(resposta.keys())
-            df_existente = df_existente[colunas_permitidas].copy()
-
             df_novo = pd.concat(
                 [df_existente, pd.DataFrame([resposta])],
                 ignore_index=True,
@@ -1369,7 +1361,7 @@ with tab_avaliacao:
         else:
             df_novo = pd.DataFrame([resposta])
 
-        # Salva tudo
+        # Salva (sobrescreve com o conjunto atualizado)
         df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
         st.success("Obrigado pela sua avaliação! 🙌")
@@ -1378,72 +1370,132 @@ with tab_avaliacao:
 
     st.markdown("---")
 
-    # ---------------- VISUALIZAÇÃO ----------------
-    st.subheader("📊 Avaliações já recebidas")
+    # ---------------- DASHBOARD DE AVALIAÇÕES ----------------
+    st.subheader("📊 Painel de avaliações do LABCOST")
 
     if csv_path.exists():
         df_av = pd.read_csv(csv_path)
 
-        # Total
-        st.write(f"Total de avaliações respondidas: **{len(df_av)}**")
-
-        # MÉDIAS
-        col1, col2, col3 = st.columns(3)
-        st.metric("Média – Nota geral", f"{df_av['Nota geral'].mean():.1f}")
-        st.metric("Média – Facilidade", f"{df_av['Facilidade'].mean():.1f}")
-        st.metric("Média – Utilidade", f"{df_av['Utilidade'].mean():.1f}")
-
-        # TIPO DE USUÁRIO
-        st.markdown("#### Quem está usando o LABCOST?")
-        dist_tipo = (
-            df_av["Tipo de usuário"]
-            .value_counts()
-            .rename_axis("Tipo de usuário")
-            .reset_index(name="Quantidade")
-            .set_index("Tipo de usuário")
-        )
-        st.bar_chart(dist_tipo)
-
-        # ESTADOS
-        if "Estado" in df_av.columns:
-            st.markdown("#### 🌎 De quais Estados vêm os usuários?")
-
-            df_estado = df_av["Estado"].fillna("").replace("", "NÃO INFORMADO")
-            dist_estado = (
-                df_estado.value_counts()
-                .rename_axis("Estado")
-                .reset_index(name="Qtd")
-            )
-
-            colA, colB = st.columns([1, 1])
-            colA.dataframe(dist_estado, use_container_width=True)
-            colB.bar_chart(dist_estado.set_index("Estado")["Qtd"])
-
-        # NUVEM DE PALAVRAS
-        st.markdown("#### ☁️ Nuvem de palavras (gráfico de barras)")
-
-        palavras = df_av["Palavra_LABCOST"].astype(str).str.lower().str.strip()
-        palavras = palavras[palavras != ""]
-
-        if len(palavras) > 0:
-            freq = (
-                palavras.value_counts()
-                .rename_axis("Palavra")
-                .reset_index(name="Frequência")
-            )
-            st.bar_chart(freq.set_index("Palavra")["Frequência"])
+        if df_av.empty:
+            st.info("Ainda não há dados suficientes para montar o painel.")
         else:
-            st.info("Nenhuma palavra enviada ainda.")
+            # Garante que as notas sejam numéricas
+            for col in ["Nota geral", "Facilidade", "Utilidade"]:
+                if col in df_av.columns:
+                    df_av[col] = pd.to_numeric(df_av[col], errors="coerce")
 
-        # TABELA FINAL (AGORA SEM NOME/E-MAIL)
-        st.markdown("#### 📄 Tabela completa de avaliações")
-        st.dataframe(df_av, use_container_width=True)
+            # --------- KPI CARDS (topo do dashboard) ----------
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Respostas totais", f"{len(df_av)}")
+            if "Nota geral" in df_av.columns:
+                with col2:
+                    st.metric("Média – Nota geral", f"{df_av['Nota geral'].mean():.1f}")
+            if "Facilidade" in df_av.columns:
+                with col3:
+                    st.metric("Média – Facilidade", f"{df_av['Facilidade'].mean():.1f}")
+            if "Utilidade" in df_av.columns:
+                with col4:
+                    st.metric("Média – Utilidade", f"{df_av['Utilidade'].mean():.1f}")
 
-        # Download
-        with open(csv_path, "rb") as f:
-            st.download_button("📥 Baixar avaliações em CSV", f, "avaliacoes_labcost.csv")
+            # --------- PERFIL DOS USUÁRIOS ----------
+            st.markdown("### 👥 Perfil dos usuários")
 
+            col_a, col_b = st.columns(2)
+
+            # Distribuição por tipo de usuário
+            if "Tipo de usuário" in df_av.columns:
+                dist_tipo = (
+                    df_av["Tipo de usuário"]
+                    .value_counts()
+                    .reset_index()
+                    .rename(columns={"index": "Tipo de usuário", "Tipo de usuário": "Quantidade"})
+                )
+
+                with col_a:
+                    st.markdown("#### Por tipo de usuário")
+                    chart_tipo = (
+                        alt.Chart(dist_tipo)
+                        .mark_bar()
+                        .encode(
+                            x=alt.X("Tipo de usuário:N", sort="-y", title="Tipo"),
+                            y=alt.Y("Quantidade:Q", title="Qtd. de respostas"),
+                            tooltip=["Tipo de usuário", "Quantidade"],
+                        )
+                        .properties(height=300)
+                    )
+                    st.altair_chart(chart_tipo, use_container_width=True)
+
+            # Distribuição por Estado (UF)
+            if "Estado" in df_av.columns:
+                df_av["Estado"] = df_av["Estado"].astype(str).str.upper().str.strip()
+                dist_estado = (
+                    df_av["Estado"]
+                    .value_counts()
+                    .reset_index()
+                    .rename(columns={"index": "Estado", "Estado": "Quantidade"})
+                )
+
+                with col_b:
+                    st.markdown("#### Por estado (UF)")
+                    chart_estado = (
+                        alt.Chart(dist_estado)
+                        .mark_bar()
+                        .encode(
+                            x=alt.X("Estado:N", sort="-y", title="UF"),
+                            y=alt.Y("Quantidade:Q", title="Qtd. de respostas"),
+                            tooltip=["Estado", "Quantidade"],
+                        )
+                        .properties(height=300)
+                    )
+                    st.altair_chart(chart_estado, use_container_width=True)
+
+            # --------- OPINIÃO EM UMA PALAVRA ----------
+            if "Palavra_LABCOST" in df_av.columns:
+                st.markdown("### ☁️ Opinião geral sobre o LABCOST")
+
+                palavras = (
+                    df_av["Palavra_LABCOST"]
+                    .astype(str)
+                    .str.strip()
+                )
+                palavras = palavras[palavras != ""]
+
+                if not palavras.empty:
+                    freq_palavras = (
+                        palavras.value_counts()
+                        .reset_index()
+                        .rename(columns={"index": "Palavra", "Palavra_LABCOST": "Frequência"})
+                    )
+
+                    chart_palavras = (
+                        alt.Chart(freq_palavras)
+                        .mark_bar()
+                        .encode(
+                            x=alt.X("Palavra:N", sort="-y", title="Opinião"),
+                            y=alt.Y("Frequência:Q", title="Qtd. de respostas"),
+                            tooltip=["Palavra", "Frequência"],
+                        )
+                        .properties(height=300)
+                    )
+                    st.altair_chart(chart_palavras, use_container_width=True)
+
+            # --------- BASE COMPLETA + DOWNLOAD ----------
+            st.markdown("### 📄 Base de dados (para análise detalhada)")
+            st.dataframe(df_av, use_container_width=True)
+
+            with open(csv_path, "rb") as f:
+                st.download_button(
+                    label="📥 Baixar avaliações em CSV",
+                    data=f,
+                    file_name="avaliacoes_labcost.csv",
+                    mime="text/csv",
+                )
     else:
-        st.info("Nenhuma avaliação enviada ainda.")
+        st.info(
+            "Ainda não há avaliações salvas. Assim que a primeira for enviada, "
+            "o painel será exibido aqui."
+        )
+
 
 
