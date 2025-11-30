@@ -1289,14 +1289,6 @@ with tab_avaliacao:
 
     # ---------------- FORMULÁRIO DE AVALIAÇÃO ----------------
     with st.form("form_avaliacao"):
-        nome = st.text_input("Nome (opcional)")
-        email = st.text_input("E-mail (opcional)")
-
-        col_a, col_b = st.columns(2)
-        with col_a:
-            cidade = st.text_input("Cidade (opcional)")
-        with col_b:
-            estado = st.text_input("Estado (opcional)")
 
         tipo_usuario = st.selectbox(
             "Você é:",
@@ -1311,23 +1303,26 @@ with tab_avaliacao:
         nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
         facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
         utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
-        comentario = st.text_area("Comentários e sugestões (opcional)")
+
+        palavra = st.text_input(
+            "Em **uma palavra**, como você descreve o LABCOST? "
+            "(ex.: *didático*, *útil*, *complexo*...)"
+        )
 
         enviar = st.form_submit_button("Enviar avaliação")
 
     # ---- TRATAMENTO DO ENVIO (fora do with st.form, mas ainda dentro da aba) ----
     if enviar:
-        # Monta o registro da resposta
+        # Normaliza a palavra (opcional: tira espaços extras)
+        palavra_limpa = palavra.strip()
+
+        # Monta o registro da resposta (sem nome, e-mail, cidade, estado)
         resposta = {
-            "Nome": nome,
-            "E-mail": email,
-            "Cidade": cidade,
-            "Estado": estado,
             "Tipo de usuário": tipo_usuario,
             "Nota geral": nota_geral,
             "Facilidade": facilidade,
             "Utilidade": utilidade,
-            "Comentário": comentario,
+            "Palavra_LABCOST": palavra_limpa,
         }
 
         # Se já existir, carrega e acrescenta; senão, cria novo
@@ -1344,7 +1339,7 @@ with tab_avaliacao:
         df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
         st.success("Obrigado pela sua avaliação! 🙌")
-        st.write("### Resumo da sua resposta:")
+        st.write("### Resumo da sua resposta (anônima):")
         st.write(resposta)
 
     st.markdown("---")
@@ -1378,16 +1373,42 @@ with tab_avaliacao:
             st.markdown("#### Quem está usando o LABCOST?")
             dist_tipo = (
                 df_av["Tipo de usuário"]
+                .fillna("Não informado")
                 .value_counts()
-                .reset_index()
-                .rename(columns={"index": "Tipo de usuário", "Tipo de usuário": "Quantidade"})
+                .reset_index(name="Quantidade")
             )
+            dist_tipo.columns = ["Tipo de usuário", "Quantidade"]
             dist_tipo = dist_tipo.set_index("Tipo de usuário")
             st.bar_chart(dist_tipo)
 
-        # Tabela com as avaliações
-        st.markdown("#### Tabela completa de avaliações")
-        st.dataframe(df_av, use_container_width=True)
+        # "Nuvem de palavras" simples a partir de Palavra_LABCOST
+        if "Palavra_LABCOST" in df_av.columns:
+            st.markdown("#### ☁️ Nuvem de palavras – uma palavra sobre o LABCOST")
+
+            # Contagem das palavras (maiúsculas/minúsculas normalizadas)
+            serie_palavras = (
+                df_av["Palavra_LABCOST"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+            )
+            contagem = (
+                serie_palavras[serie_palavras != ""]
+                .value_counts()
+                .reset_index(name="Frequência")
+            )
+            contagem.columns = ["palavra", "Frequência"]
+
+            if not contagem.empty:
+                # Mostra como gráfico de barras (tipo "nuvem" simplificada)
+                st.bar_chart(
+                    contagem.set_index("palavra")
+                )
+
+                # Também exibe tabela
+                st.dataframe(contagem, use_container_width=True)
+            else:
+                st.info("Ainda não há palavras registradas nas avaliações.")
 
         # (Opcional) botão para baixar o CSV
         with open(csv_path, "rb") as f:
