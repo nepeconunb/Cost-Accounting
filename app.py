@@ -3,28 +3,262 @@ import pandas as pd
 from pathlib import Path
 import altair as alt
 
-# ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
+# --------------------------------------------------------
+# CONFIGURAÇÃO DA PÁGINA
+# --------------------------------------------------------
 st.set_page_config(
     page_title="LABCOST – Simulador de Gastos e Custos",
     page_icon="📊",
     layout="wide",
 )
 
-# ---------------- TABS PRINCIPAIS ----------------
+# ========================================================
+# FUNÇÕES AUXILIARES – INVENTÁRIO
+# ========================================================
+def calcula_inventario_linha(ei_qtd, ei_ctu, prod_qtd, prod_ctu, vend_qtd, metodo):
+    """
+    Calcula CMV e Estoque Final de UMA linha (um produto em um mês),
+    para os métodos:
+    - PEPS (FIFO)
+    - UEPS (LIFO)
+    - Média ponderada
+    """
+
+    # Camadas de estoque: estoque inicial + produção do período
+    layers = []
+    if ei_qtd > 0:
+        layers.append({"q": float(ei_qtd), "ctu": float(ei_ctu)})
+    if prod_qtd > 0:
+        layers.append({"q": float(prod_qtd), "ctu": float(prod_ctu)})
+
+    total_disp_q = sum(l["q"] for l in layers)
+
+    # Se não há estoque nem produção, tudo zero
+    if total_disp_q <= 0:
+        return 0.0, 0.0, 0.0, 0.0
+
+    vend_qtd = float(vend_qtd)
+    vend_qtd_eff = min(vend_qtd, total_disp_q)  # evita vender mais do que existe
+
+    metodo = metodo.lower()
+
+    # ---------------- MÉDIA PONDERADA ----------------
+    if metodo.startswith("média"):
+        total_cost = sum(l["q"] * l["ctu"] for l in layers)
+        ctu_medio = total_cost / total_disp_q if total_disp_q > 0 else 0.0
+        cmv = vend_qtd_eff * ctu_medio
+        estoque_final_q = total_disp_q - vend_qtd_eff
+        estoque_final_v = estoque_final_q * ctu_medio
+        return ctu_medio, cmv, estoque_final_q, estoque_final_v
+
+    # ---------------- PEPS / UEPS ----------------
+    if metodo.startswith("peps"):
+        iter_layers = layers                  # mais antigo primeiro
+    elif metodo.startswith("ueps"):
+        iter_layers = list(reversed(layers))  # mais recente primeiro
+    else:
+        raise ValueError("Método desconhecido")
+
+    cmv = 0.0
+    remaining = vend_qtd_eff
+
+    for layer in iter_layers:
+        if remaining <= 0:
+            break
+        use_q = min(layer["q"], remaining)
+        cmv += use_q * layer["ctu"]
+        layer["q"] -= use_q
+        remaining -= use_q
+
+    # Após a venda, recompor as camadas na ordem original (EI + Produção)
+    if metodo.startswith("peps"):
+        final_layers = iter_layers
+    else:  # UEPS -> iter_layers está invertida, então reverte de volta
+        final_layers = list(reversed(iter_layers))
+
+    estoque_final_q = sum(l["q"] for l in final_layers)
+    estoque_final_v = sum(l["q"] * l["ctu"] for l in final_layers)
+
+    # Custo unitário médio do estoque final (apenas para exibir)
+    ctu_medio_estoque = (
+        estoque_final_v / estoque_final_q if estoque_final_q > 0 else 0.0
+    )
+
+    return ctu_medio_estoque, cmv, estoque_final_q, estoque_final_v
+
+
+def inventario_produtos():
+    st.header("📚 Livro de Inventário – PEPS, UEPS e Média Ponderada")
+
+    st.markdown(
+        """
+        Este módulo replica a sua **planilha de inventário por mês e por produto**.
+
+        Você pode escolher o método de custeio:
+
+        - **PEPS (FIFO)**  
+        - **UEPS (LIFO)**  
+        - **Média ponderada**
+
+        Para cada **mês** e **produto**, informe:
+        - Estoque inicial (Quantidade e CTu)  
+        - Produção do período (Quantidade e CTu)  
+        - Quantidade vendida no mês  
+        - Preço de venda (apenas informativo)  
+        """
+    )
+
+    metodo = st.radio(
+        "Escolha o método para cálculo do CMV e do estoque final:",
+        ["PEPS (FIFO)", "UEPS (LIFO)", "Média ponderada"],
+        horizontal=True,
+    )
+
+    # Quantidade de meses e produtos
+    n_meses = st.number_input(
+        "Quantidade de meses para simular:",
+        min_value=1,
+        max_value=12,
+        value=3,
+        step=1,
+    )
+
+    n_produtos = st.number_input(
+        "Quantidade de produtos (até 10):",
+        min_value=1,
+        max_value=10,
+        value=3,
+        step=1,
+    )
+
+    # Nomes padrão: Produto 1, Produto 2, ...
+    default_products = [f"Produto {i+1}" for i in range(int(n_produtos))]
+    st.markdown("Você pode editar os nomes dos produtos na tabela de cada mês.")
+
+    resultados_meses = []
+
+    for mes in range(1, int(n_meses) + 1):
+        st.markdown(f"### 📆 Mês {mes}")
+        st.markdown("Preencha os dados do mês:")
+
+        dados = {
+            "Produto": default_products,
+            "Estoque inicial (Qtd)": [0.0] * int(n_produtos),
+            "Estoque inicial (CTu)": [0.0] * int(n_produtos),
+            "Produção do período (Qtd)": [0.0] * int(n_produtos),
+            "Produção do período (CTu)": [0.0] * int(n_produtos),
+            "Quantidade vendida (unid.)": [0.0] * int(n_produtos),
+            "Preço de venda (R$)": [0.0] * int(n_produtos),
+        }
+
+        df_mes = pd.DataFrame(dados)
+
+        df_editado = st.data_editor(
+            df_mes,
+            num_rows="fixed",
+            use_container_width=True,
+            key=f"mes_{mes}",
+        )
+
+        # ---- Cálculo por produto naquele mês ----
+        linhas_resultado = []
+        for _, row in df_editado.iterrows():
+            disp_q = row["Estoque inicial (Qtd)"] + row["Produção do período (Qtd)"]
+
+            ctu_base, cmv, estoque_q, estoque_v = calcula_inventario_linha(
+                row["Estoque inicial (Qtd)"],
+                row["Estoque inicial (CTu)"],
+                row["Produção do período (Qtd)"],
+                row["Produção do período (CTu)"],
+                row["Quantidade vendida (unid.)"],
+                metodo,
+            )
+
+            linhas_resultado.append(
+                {
+                    "Produto": row["Produto"],
+                    "Estoque inicial (Qtd)": row["Estoque inicial (Qtd)"],
+                    "Estoque inicial (CTu)": row["Estoque inicial (CTu)"],
+                    "Produção (Qtd)": row["Produção do período (Qtd)"],
+                    "Produção (CTu)": row["Produção do período (CTu)"],
+                    "Produção acumulada (unid.)": disp_q,
+                    "Quantidade vendida (unid.)": row["Quantidade vendida (unid.)"],
+                    "Estoque final (Qtd)": estoque_q,
+                    "Preço de venda (R$)": row["Preço de venda (R$)"],
+                    "CTu utilizado (método)": ctu_base if metodo.lower().startswith("média") else None,
+                    "CMV (R$)": cmv,
+                    "Estoque final (R$)": estoque_v,
+                }
+            )
+
+        df_res = pd.DataFrame(linhas_resultado)
+        resultados_meses.append((mes, df_res))
+
+        st.markdown(f"#### ✅ Resultado – Mês {mes}")
+        st.dataframe(
+            df_res.style.format(
+                {
+                    "Estoque inicial (CTu)": "R$ {:,.2f}",
+                    "Produção (CTu)": "R$ {:,.2f}",
+                    "Preço de venda (R$)": "R$ {:,.2f}",
+                    "CTu utilizado (método)": "R$ {:,.2f}",
+                    "CMV (R$)": "R$ {:,.2f}",
+                    "Estoque final (R$)": "R$ {:,.2f}",
+                }
+            ),
+            use_container_width=True,
+        )
+
+        total_cmv = df_res["CMV (R$)"].sum()
+        total_estoque = df_res["Estoque final (R$)"].sum()
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(f"CMV total – Mês {mes}", f"R$ {total_cmv:,.2f}")
+        with col2:
+            st.metric(f"Estoque final total – Mês {mes}", f"R$ {total_estoque:,.2f}")
+
+        st.markdown("---")
+
+    # Visão consolidada dos meses (igual um resumo da planilha)
+    if len(resultados_meses) > 1:
+        st.markdown("### 📊 Visão consolidada – Totais por mês")
+        consol = []
+        for mes, df_res in resultados_meses:
+            consol.append(
+                {
+                    "Mês": mes,
+                    "CMV total (R$)": df_res["CMV (R$)"].sum(),
+                    "Estoque final total (R$)": df_res["Estoque final (R$)"].sum(),
+                }
+            )
+        df_consol = pd.DataFrame(consol)
+        st.dataframe(
+            df_consol.style.format(
+                {
+                    "CMV total (R$)": "R$ {:,.2f}",
+                    "Estoque final total (R$)": "R$ {:,.2f}",
+                }
+            ),
+            use_container_width=True,
+        )
+
+# ========================================================
+# TABS PRINCIPAIS
+# ========================================================
 tab_home, tab_simulador, tab_classificacao, tab_markup, tab_inventario = st.tabs(
     [
         "🏠 Página inicial",
         "💻 Simulador de Gastos e Custos",
         "📚 Classificação de Gastos",
         "🧾 Mark-up de Preço",
-        "📦 Livro de Inventário"
+        "📦 Livro de Inventário",
     ]
 )
 
-
-# =========================================================
+# ========================================================
 # TAB 0 – PÁGINA INICIAL
-# =========================================================
+# ========================================================
 with tab_home:
     col_logo, col_texto = st.columns([1, 2])
 
@@ -45,7 +279,7 @@ with tab_home:
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
             como parte das iniciativas do **NEPECON – Núcleo de Estudos e Pesquisas em Sustentabilidade
             Econômica e Socioambiental**.
-            Contato: nepeconunb@gmail.com
+            Contato: nepeconunb@gmail.com  
             Youtube: https://www.youtube.com/channel/UCu55I4Qpp2nBYWu5-qftkZw/videos
 
             O **LABCOST** é um laboratório virtual para apoiar o ensino de **Contabilidade de Custos e Gestão**, com foco em:
@@ -56,9 +290,7 @@ with tab_home:
             - **Margem de segurança**  
             - **Grau de Alavancagem Operacional (GAO)**  
             - Análise de **mix de produtos**  
-
-            A ferramenta foi pensada para uso em disciplinas de graduação e pós-graduação, 
-            atividades de laboratório, estudos dirigidos e educação a distância.
+            - Controle de **estoques e CMV** (PEPS, UEPS, Média Ponderada)
             """
         )
 
@@ -93,19 +325,16 @@ with tab_home:
     with col2:
         st.markdown(
             """
-            ### 📚 Classificação de Gastos  
-            Na aba **“📚 Classificação de Gastos”**, os alunos podem:
+            ### 📚 Classificação de Gastos e Inventário  
+            - Na aba **“📚 Classificação de Gastos”**, os alunos podem:
+              - Classificar itens em **Custo** ou **Despesa**  
+              - Detalhar: Custo Direto/Indireto/Fixo/Variável, Despesa Fixa/Variável,
+                Administrativa, com Vendas, Financeira  
 
-            - Classificar itens em **Custo** ou **Despesa**  
-            - Detalhar:
-              - Custo Direto / Indireto  
-              - Custo Fixo / Variável  
-              - Despesa Fixa / Variável  
-              - Despesa Administrativa / com Vendas / Financeira  
-
-            Ao final, o sistema mostra:
-            - Quantos itens acertou no **tipo**  
-            - Quantos acertou na **classificação detalhada**  
+            - Na aba **“📦 Livro de Inventário”**:
+              - Simular **PEPS, UEPS e Média Ponderada**  
+              - Comparar CMV e Estoque Final por método  
+              - Utilizar vários meses e até 10 produtos  
             """
         )
 
@@ -115,9 +344,9 @@ with tab_home:
     st.markdown(
         """
         - Proponha **cenários diferentes** (ex.: aumento de preço, redução de gastos fixos, 
-          mudanças no mix de produtos) e peça para os alunos analisarem o impacto no **ponto de equilíbrio** e no **lucro**.  
+          mudanças no mix de produtos, escolha do método de custeio de estoques) e peça para os alunos analisarem o impacto no **ponto de equilíbrio**, **lucro** e **CMV**.  
         - Use o LABCOST em **aulas práticas de laboratório** ou em **atividades remotas**.  
-        - Combine com leituras sobre **margem de contribuição**, **decisão de mix de produtos** e **GAO**.  
+        - Combine com leituras sobre **margem de contribuição**, **decisão de mix de produtos**, **GAO** e **métodos de avaliação de estoques**.  
         """
     )
 
@@ -126,9 +355,9 @@ with tab_home:
         "para apoiar o ensino de Contabilidade de Custos e Gestão."
     )
 
-# =========================================================
+# ========================================================
 # TAB 1 – SIMULADOR DE GASTOS E CUSTOS
-# =========================================================
+# ========================================================
 with tab_simulador:
     st.title("LABCOST – Simulador de Gastos e Custos")
 
@@ -485,9 +714,9 @@ with tab_simulador:
 
         st.caption("LABCOST – Uso educacional. Modo: Mix de produtos.")
 
-# =========================================================
+# ========================================================
 # TAB 2 – CLASSIFICAÇÃO DE GASTOS
-# =========================================================
+# ========================================================
 with tab_classificacao:
     st.title("Classificação de Gastos: Custos x Despesas e Detalhamento")
 
@@ -661,9 +890,9 @@ with tab_classificacao:
             "e **despesas fixas, variáveis, administrativas, de vendas e financeiras**."
         )
 
-# =========================================================
+# ========================================================
 # TAB 3 – PLANILHA DE MARK-UP
-# =========================================================
+# ========================================================
 with tab_markup:
     st.title("Planilha de Mark-up de Preço de Venda")
 
@@ -893,136 +1122,9 @@ with tab_markup:
         "Contabilidade de Custos e Gestão (UnB / NEPECON), com métodos de "
         "custeio variável e custeio por absorção."
     )
-def inventario_produtos():
-    import pandas as pd
-    import streamlit as st
 
-    st.header("📚 Livro de Inventário de Produtos – Custo Médio Ponderado")
-
-    st.markdown(
-        """
-        Este módulo permite montar um **Livro de Inventário simplificado**, por produto,
-        utilizando o **método do custo médio ponderado**.
-
-        Para cada produto, informe:
-
-        - **Estoque inicial**: quantidade e custo unitário (CTu);
-        - **Compras / Produção no período**: quantidade e custo unitário;
-        - **Vendas no período**: quantidade vendida.
-
-        O sistema calcula automaticamente:
-
-        - Custo total disponível para venda;
-        - Custo médio unitário (CTu médio);
-        - **CMV – Custo das Mercadorias Vendidas**;
-        - **Estoque final** em quantidade e valor.
-        """
-    )
-
-    # Quantos produtos haverá no inventário
-    n_produtos = st.number_input(
-        "Quantidade de produtos no inventário",
-        min_value=1,
-        max_value=50,
-        value=3,
-        step=1,
-    )
-
-    # Dados padrão para facilitar o preenchimento
-    dados_iniciais = {
-        "Produto": [f"Produto {i+1}" for i in range(int(n_produtos))],
-        "Estoque inicial (Qtd)": [0.0] * int(n_produtos),
-        "Estoque inicial (CTu)": [0.0] * int(n_produtos),
-        "Compras / Produção (Qtd)": [0.0] * int(n_produtos),
-        "Compras / Produção (CTu)": [0.0] * int(n_produtos),
-        "Vendas no período (Qtd)": [0.0] * int(n_produtos),
-    }
-
-    df = pd.DataFrame(dados_iniciais)
-
-    st.write("### ✏️ Informe os dados do inventário")
-    df_editado = st.data_editor(
-        df,
-        num_rows="fixed",
-        use_container_width=True,
-    )
-
-    # Copia para começar os cálculos
-    resultado = df_editado.copy()
-
-    # Custo do estoque inicial e das compras
-    resultado["Custo EI (R$)"] = (
-        resultado["Estoque inicial (Qtd)"] * resultado["Estoque inicial (CTu)"]
-    )
-    resultado["Custo Compras (R$)"] = (
-        resultado["Compras / Produção (Qtd)"] * resultado["Compras / Produção (CTu)"]
-    )
-
-    # Quantidade e custo total disponíveis para venda
-    resultado["Qtd disponível"] = (
-        resultado["Estoque inicial (Qtd)"] + resultado["Compras / Produção (Qtd)"]
-    )
-    resultado["Custo total disponível (R$)"] = (
-        resultado["Custo EI (R$)"] + resultado["Custo Compras (R$)"]
-    )
-
-    # Custo médio unitário (evitar divisão por zero)
-    def calcula_ctu_medio(row):
-        if row["Qtd disponível"] > 0:
-            return row["Custo total disponível (R$)"] / row["Qtd disponível"]
-        return 0.0
-
-    resultado["CTu médio (R$)"] = resultado.apply(calcula_ctu_medio, axis=1)
-
-    # CMV e estoque final
-    resultado["CMV (R$)"] = resultado["Vendas no período (Qtd)"] * resultado["CTu médio (R$)"]
-    resultado["Estoque final (Qtd)"] = (
-        resultado["Qtd disponível"] - resultado["Vendas no período (Qtd)"]
-    )
-    resultado["Estoque final (R$)"] = (
-        resultado["Estoque final (Qtd)"] * resultado["CTu médio (R$)"]
-    )
-
-    st.write("### ✅ Resultado do Livro de Inventário (por produto)")
-    st.dataframe(
-        resultado[
-            [
-                "Produto",
-                "Estoque inicial (Qtd)",
-                "Estoque inicial (CTu)",
-                "Compras / Produção (Qtd)",
-                "Compras / Produção (CTu)",
-                "Vendas no período (Qtd)",
-                "Qtd disponível",
-                "Custo total disponível (R$)",
-                "CTu médio (R$)",
-                "CMV (R$)",
-                "Estoque final (Qtd)",
-                "Estoque final (R$)",
-            ]
-        ],
-        use_container_width=True,
-    )
-
-    # Totais gerais do período
-    total_cmv = float(resultado["CMV (R$)"].sum())
-    total_estoque_final = float(resultado["Estoque final (R$)"].sum())
-
-    st.write("### 📌 Totais do período")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric(
-            "CMV total (R$)",
-            f"{total_cmv:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
-        )
-    with col2:
-        st.metric(
-            "Valor total do estoque final (R$)",
-            f"{total_estoque_final:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
-        )
-# =========================================================
+# ========================================================
 # TAB 4 – LIVRO DE INVENTÁRIO
-# =========================================================
+# ========================================================
 with tab_inventario:
     inventario_produtos()
-
