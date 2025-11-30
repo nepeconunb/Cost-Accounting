@@ -6,16 +6,8 @@ import altair as alt
 # --------------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
 # --------------------------------------------------------
-import streamlit as st
-import pandas as pd
-from pathlib import Path
-import altair as alt
-
-# --------------------------------------------------------
-# CONFIGURAÇÃO DA PÁGINA
-# --------------------------------------------------------
 st.set_page_config(
-    page_title="LABCOST – Simulador de Custo-Volume-Lucro",
+    page_title="LABCOST – Simulador de Gastos e Custos",
     page_icon="📊",
     layout="wide",
 )
@@ -391,9 +383,8 @@ tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs
         "🏠 Página inicial",                 # 1ª aba
         "📚 Classificação de Gastos",        # 2ª aba
         "📦 Livro de Inventário",            # 3ª aba
-        "💻 Simulador de Custo-Volume-Lucro", # 4ª aba (Produto único + Mix)
+        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
         "🧾 Mark-up de Preço",               # 5ª aba
-        "⭐ Avaliação do LABCOST",           # 6ª aba
     ]
 )
 
@@ -414,7 +405,7 @@ with tab_home:
         st.title("Bem-vindo ao LABCOST")
         st.markdown(
             """
-            **LABCOST – Laboratório de Simulação de Custo-Volume-Lucro**  
+            **LABCOST – Laboratório de Simulação de Gastos e Custos**  
 
             Este simulador é utilizado na disciplina de **Contabilidade de Custos**,
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
@@ -499,10 +490,10 @@ with tab_home:
     )
 
 # ========================================================
-# TAB – SIMULADOR DE CUSTO, VOLUME, LUCRO
+# TAB – SIMULADOR DE GASTOS E CUSTOS
 # ========================================================
 with tab_simulador:
-    st.title("LABCOST – Simulador de Custo-Volume-Lucro")
+    st.title("LABCOST – Simulador de Gastos e Custos")
 
     st.write(
         """
@@ -1270,3 +1261,4 @@ with tab_markup:
 # ========================================================
 with tab_inventario:
     inventario_produtos()
+
