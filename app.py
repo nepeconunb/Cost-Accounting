@@ -1284,16 +1284,20 @@ with tab_avaliacao:
         """
     )
 
+    # Caminho do arquivo CSV onde as avaliações serão guardadas
+    csv_path = Path("avaliacoes_labcost.csv")
+
+    # ---------------- FORMULÁRIO DE AVALIAÇÃO ----------------
     with st.form("form_avaliacao"):
         nome = st.text_input("Nome (opcional)")
         email = st.text_input("E-mail (opcional)")
-        
+
         col_a, col_b = st.columns(2)
         with col_a:
             cidade = st.text_input("Cidade (opcional)")
         with col_b:
             estado = st.text_input("Estado (opcional)")
-        
+
         tipo_usuario = st.selectbox(
             "Você é:",
             [
@@ -1301,7 +1305,7 @@ with tab_avaliacao:
                 "Professor",
                 "Profissional da área contábil",
                 "Outro",
-            ]
+            ],
         )
 
         nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
@@ -1311,42 +1315,91 @@ with tab_avaliacao:
 
         enviar = st.form_submit_button("Enviar avaliação")
 
-        if enviar:
-            # Monta o registro da resposta
-            resposta = {
-                "Nome": nome,
-                "E-mail": email,
-                "Cidade": cidade,
-                "Estado": estado,
-                "Tipo de usuário": tipo_usuario,
-                "Nota geral": nota_geral,
-                "Facilidade": facilidade,
-                "Utilidade": utilidade,
-                "Comentário": comentario,
-            }
+    # ---- TRATAMENTO DO ENVIO (fora do with st.form, mas ainda dentro da aba) ----
+    if enviar:
+        # Monta o registro da resposta
+        resposta = {
+            "Nome": nome,
+            "E-mail": email,
+            "Cidade": cidade,
+            "Estado": estado,
+            "Tipo de usuário": tipo_usuario,
+            "Nota geral": nota_geral,
+            "Facilidade": facilidade,
+            "Utilidade": utilidade,
+            "Comentário": comentario,
+        }
 
-            # Caminho do arquivo CSV
-            csv_path = Path("avaliacoes_labcost.csv")
-
-            # Se já existir, carrega e acrescenta; senão, cria novo
-            if csv_path.exists():
-                df_existente = pd.read_csv(csv_path)
-                df_novo = pd.concat(
-                    [df_existente, pd.DataFrame([resposta])],
-                    ignore_index=True
-                )
-            else:
-                df_novo = pd.DataFrame([resposta])
-
-            # Salva (sobrescreve com o conjunto atualizado)
-            df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
-
-            st.success("Obrigado pela sua avaliação! 🙌")
-            st.write("### Resumo da sua resposta:")
-            st.write(resposta)
-
-            st.info(
-                "As avaliações estão sendo salvas no arquivo **avaliacoes_labcost.csv** "
-                "na pasta do aplicativo."
+        # Se já existir, carrega e acrescenta; senão, cria novo
+        if csv_path.exists():
+            df_existente = pd.read_csv(csv_path)
+            df_novo = pd.concat(
+                [df_existente, pd.DataFrame([resposta])],
+                ignore_index=True,
             )
+        else:
+            df_novo = pd.DataFrame([resposta])
+
+        # Salva (sobrescreve com o conjunto atualizado)
+        df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
+
+        st.success("Obrigado pela sua avaliação! 🙌")
+        st.write("### Resumo da sua resposta:")
+        st.write(resposta)
+
+    st.markdown("---")
+
+    # ---------------- VISUALIZAÇÃO DAS AVALIAÇÕES ----------------
+    st.subheader("📊 Avaliações já recebidas")
+
+    if csv_path.exists():
+        df_av = pd.read_csv(csv_path)
+
+        # Mostra quantidade total
+        st.write(f"Total de avaliações respondidas: **{len(df_av)}**")
+
+        # Calcula médias das notas, se as colunas existirem
+        col1, col2, col3 = st.columns(3)
+        if "Nota geral" in df_av.columns:
+            media_geral = df_av["Nota geral"].mean()
+            with col1:
+                st.metric("Média – Nota geral", f"{media_geral:.1f}")
+        if "Facilidade" in df_av.columns:
+            media_facilidade = df_av["Facilidade"].mean()
+            with col2:
+                st.metric("Média – Facilidade", f"{media_facilidade:.1f}")
+        if "Utilidade" in df_av.columns:
+            media_utilidade = df_av["Utilidade"].mean()
+            with col3:
+                st.metric("Média – Utilidade", f"{media_utilidade:.1f}")
+
+        # Distribuição por tipo de usuário
+        if "Tipo de usuário" in df_av.columns:
+            st.markdown("#### Quem está usando o LABCOST?")
+            dist_tipo = (
+                df_av["Tipo de usuário"]
+                .value_counts()
+                .reset_index()
+                .rename(columns={"index": "Tipo de usuário", "Tipo de usuário": "Quantidade"})
+            )
+            dist_tipo = dist_tipo.set_index("Tipo de usuário")
+            st.bar_chart(dist_tipo)
+
+        # Tabela com as avaliações
+        st.markdown("#### Tabela completa de avaliações")
+        st.dataframe(df_av, use_container_width=True)
+
+        # (Opcional) botão para baixar o CSV
+        with open(csv_path, "rb") as f:
+            st.download_button(
+                label="📥 Baixar avaliações em CSV",
+                data=f,
+                file_name="avaliacoes_labcost.csv",
+                mime="text/csv",
+            )
+    else:
+        st.info(
+            "Ainda não há avaliações salvas. Assim que a primeira for enviada, "
+            "o resumo aparecerá aqui."
+        )
 
