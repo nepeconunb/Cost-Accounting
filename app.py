@@ -1272,7 +1272,7 @@ with tab_inventario:
     inventario_produtos()
 
 # ========================================================
-# TAB 5 – AVALIAÇÃO DO SISTEMA (Dashboard)
+# TAB 5 – AVALIAÇÃO DO SISTEMA (DASHBOARD SIMPLES E ESTÁVEL)
 # ========================================================
 with tab_avaliacao:
     st.title("⭐ Avaliação do LABCOST")
@@ -1291,7 +1291,7 @@ with tab_avaliacao:
     lista_estados = [
         "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
         "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
-        "SP", "SE", "TO", "Outro/Exterior"
+        "SP", "SE", "TO", "Outro/Exterior",
     ]
 
     # ---------------- FORMULÁRIO DE AVALIAÇÃO ----------------
@@ -1338,7 +1338,7 @@ with tab_avaliacao:
 
         enviar = st.form_submit_button("Enviar avaliação")
 
-    # ---- TRATAMENTO DO ENVIO ----
+    # ---------------- TRATAMENTO DO ENVIO ----------------
     if enviar:
         # Registro da resposta (sem nome, e-mail, cidade)
         resposta = {
@@ -1408,23 +1408,14 @@ with tab_avaliacao:
                 dist_tipo = (
                     df_av["Tipo de usuário"]
                     .value_counts()
-                    .reset_index()
-                    .rename(columns={"index": "Tipo de usuário", "Tipo de usuário": "Quantidade"})
+                    .rename_axis("Tipo de usuário")
+                    .reset_index(name="Quantidade")
+                    .set_index("Tipo de usuário")
                 )
 
                 with col_a:
                     st.markdown("#### Por tipo de usuário")
-                    chart_tipo = (
-                        alt.Chart(dist_tipo)
-                        .mark_bar()
-                        .encode(
-                            x=alt.X("Tipo de usuário:N", sort="-y", title="Tipo"),
-                            y=alt.Y("Quantidade:Q", title="Qtd. de respostas"),
-                            tooltip=["Tipo de usuário", "Quantidade"],
-                        )
-                        .properties(height=300)
-                    )
-                    st.altair_chart(chart_tipo, use_container_width=True)
+                    st.bar_chart(dist_tipo)
 
             # Distribuição por Estado (UF)
             if "Estado" in df_av.columns:
@@ -1432,23 +1423,14 @@ with tab_avaliacao:
                 dist_estado = (
                     df_av["Estado"]
                     .value_counts()
-                    .reset_index()
-                    .rename(columns={"index": "Estado", "Estado": "Quantidade"})
+                    .rename_axis("Estado")
+                    .reset_index(name="Quantidade")
+                    .set_index("Estado")
                 )
 
                 with col_b:
                     st.markdown("#### Por estado (UF)")
-                    chart_estado = (
-                        alt.Chart(dist_estado)
-                        .mark_bar()
-                        .encode(
-                            x=alt.X("Estado:N", sort="-y", title="UF"),
-                            y=alt.Y("Quantidade:Q", title="Qtd. de respostas"),
-                            tooltip=["Estado", "Quantidade"],
-                        )
-                        .properties(height=300)
-                    )
-                    st.altair_chart(chart_estado, use_container_width=True)
+                    st.bar_chart(dist_estado)
 
             # --------- OPINIÃO EM UMA PALAVRA ----------
             if "Palavra_LABCOST" in df_av.columns:
@@ -1460,28 +1442,19 @@ with tab_avaliacao:
                     .str.strip()
                 )
                 palavras = palavras[palavras != ""]
+                palavras = palavras[palavras.str.lower() != "none"]
 
                 if not palavras.empty:
                     freq_palavras = (
                         palavras.value_counts()
-                        .reset_index()
-                        .rename(columns={"index": "Palavra", "Palavra_LABCOST": "Frequência"})
+                        .rename_axis("Palavra")
+                        .reset_index(name="Frequência")
+                        .set_index("Palavra")
                     )
-
-                    chart_palavras = (
-                        alt.Chart(freq_palavras)
-                        .mark_bar()
-                        .encode(
-                            x=alt.X("Palavra:N", sort="-y", title="Opinião"),
-                            y=alt.Y("Frequência:Q", title="Qtd. de respostas"),
-                            tooltip=["Palavra", "Frequência"],
-                        )
-                        .properties(height=300)
-                    )
-                    st.altair_chart(chart_palavras, use_container_width=True)
+                    st.bar_chart(freq_palavras)
 
             # --------- BASE COMPLETA + DOWNLOAD ----------
-            st.markdown("### 📄 Base de dados (para análise detalhada)")
+            st.markdown("### 📄 Tabela completa de avaliações")
             st.dataframe(df_av, use_container_width=True)
 
             with open(csv_path, "rb") as f:
@@ -1496,6 +1469,5 @@ with tab_avaliacao:
             "Ainda não há avaliações salvas. Assim que a primeira for enviada, "
             "o painel será exibido aqui."
         )
-
 
 
