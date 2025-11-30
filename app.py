@@ -17,8 +17,7 @@ tab_home, tab_simulador, tab_classificacao, tab_markup = st.tabs(
         "💻 Simulador de Gastos e Custos",
         "📚 Classificação de Gastos",
         "🧾 Mark-up de Preço"
-        with tab_inventario:
-    inventario_produtos()
+        "inventario_produtos"
     ]
 )
 
