@@ -15,7 +15,7 @@ import altair as alt
 # CONFIGURAÇÃO DA PÁGINA
 # --------------------------------------------------------
 st.set_page_config(
-    page_title="LABCOST – Simulador de Gastos e Custos",
+    page_title="LABCOST – Simulador de Custo-Volume-Lucro",
     page_icon="📊",
     layout="wide",
 )
@@ -391,8 +391,9 @@ tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs
         "🏠 Página inicial",                 # 1ª aba
         "📚 Classificação de Gastos",        # 2ª aba
         "📦 Livro de Inventário",            # 3ª aba
-        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
+        "💻 Simulador de Custo-Volume-Lucro", # 4ª aba (Produto único + Mix)
         "🧾 Mark-up de Preço",               # 5ª aba
+        "⭐ Avaliação do LABCOST",           # 6ª aba
     ]
 )
 
@@ -498,10 +499,10 @@ with tab_home:
     )
 
 # ========================================================
-# TAB – SIMULADOR DE GASTOS E CUSTOS
+# TAB – SIMULADOR DE CUSTO, VOLUME, LUCRO
 # ========================================================
 with tab_simulador:
-    st.title("LABCOST – Simulador de Gastos e Custos")
+    st.title("LABCOST – Simulador de Custo-Volume-Lucro")
 
     st.write(
         """
