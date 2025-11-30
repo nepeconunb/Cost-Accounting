@@ -12,6 +12,11 @@ st.set_page_config(
     layout="wide",
 )
 
+# Contador simples de acessos na sessão
+if "visit_count" not in st.session_state:
+    st.session_state["visit_count"] = 0
+st.session_state["visit_count"] += 1
+
 # ========================================================
 # FUNÇÕES AUXILIARES – INVENTÁRIO
 # ========================================================
@@ -378,13 +383,14 @@ def inventario_produtos():
 # ========================================================
 # TABS PRINCIPAIS
 # ========================================================
-tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs(
+tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup, tab_avaliacao = st.tabs(
     [
-        "🏠 Página inicial",                 # 1ª aba
-        "📚 Classificação de Gastos",        # 2ª aba
-        "📦 Livro de Inventário",            # 3ª aba
-        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
-        "🧾 Mark-up de Preço",               # 5ª aba
+        "🏠 Página inicial",
+        "📚 Classificação de Gastos",
+        "📦 Livro de Inventário",
+        "💻 Simulador de Gastos e Custos",
+        "🧾 Mark-up de Preço",
+        "⭐ Avaliação do LABCOST",
     ]
 )
 
@@ -425,6 +431,9 @@ with tab_home:
             - Controle de **estoques e CMV** (PEPS, UEPS, Média Ponderada)
             """
         )
+
+    # contador simples na página inicial
+    st.metric("Acessos nesta sessão", st.session_state["visit_count"])
 
     st.markdown("---")
 
@@ -1261,3 +1270,40 @@ with tab_markup:
 # ========================================================
 with tab_inventario:
     inventario_produtos()
+
+# ========================================================
+# TAB 5 – AVALIAÇÃO DO SISTEMA
+# ========================================================
+with tab_avaliacao:
+    st.title("⭐ Avaliação do LABCOST")
+
+    st.write(
+        """
+        Ajude a melhorar o **LABCOST**!  
+        Responda rapidamente à avaliação abaixo.
+        """
+    )
+
+    with st.form("form_avaliacao"):
+        nome = st.text_input("Nome (opcional)")
+        polo = st.text_input("Polo / Turma (opcional)")
+        nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
+        facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
+        utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
+        comentario = st.text_area("Comentários e sugestões")
+
+        enviar = st.form_submit_button("Enviar avaliação")
+
+    if enviar:
+        st.success("Obrigado pela sua avaliação! 🙌")
+        st.write("**Resumo da sua resposta:**")
+        st.write(
+            {
+                "Nome": nome,
+                "Polo/Turma": polo,
+                "Nota geral": nota_geral,
+                "Facilidade": facilidade,
+                "Utilidade": utilidade,
+                "Comentário": comentario,
+            }
+        )
