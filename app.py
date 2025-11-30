@@ -380,12 +380,11 @@ def inventario_produtos():
 # ========================================================
 tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs(
     [
-        "🏠 Página inicial",
-        "📚 Classificação de Gastos",
-        "📦 Livro de Inventário",
-        "💻 Simulador de Gastos e Custos",
-        "🧾 Mark-up de Preço",
-        "⭐ Avaliação do LABCOST",
+        "🏠 Página inicial",                 # 1ª aba
+        "📚 Classificação de Gastos",        # 2ª aba
+        "📦 Livro de Inventário",            # 3ª aba
+        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
+        "🧾 Mark-up de Preço",               # 5ª aba
     ]
 )
 
@@ -1262,42 +1261,3 @@ with tab_markup:
 # ========================================================
 with tab_inventario:
     inventario_produtos()
-# ========================================================
-# TAB 5 – AVALIAÇÃO DO SISTEMA
-# ========================================================
-with tab_avaliacao:
-    st.title("⭐ Avaliação do LABCOST")
-
-    st.write(
-        """
-        Ajude a melhorar o **LABCOST**!  
-        Responda rapidamente à avaliação abaixo.
-        """
-    )
-
-    with st.form("form_avaliacao"):
-        nome = st.text_input("Nome (opcional)")
-        polo = st.text_input("Polo / Turma (opcional)")
-        nota_geral = st.slider("Nota geral para o LABCOST", 1, 10, 9)
-        facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
-        utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
-        comentario = st.text_area("Comentários e sugestões")
-
-        enviar = st.form_submit_button("Enviar avaliação")
-
-    if enviar:
-        # Por enquanto só exibimos na tela.
-        # Depois você pode salvar em CSV, Google Sheets, etc.
-        st.success("Obrigado pela sua avaliação! 🙌")
-        st.write("**Resumo da sua resposta:**")
-        st.write(
-            {
-                "Nome": nome,
-                "Polo/Turma": polo,
-                "Nota geral": nota_geral,
-                "Facilidade": facilidade,
-                "Utilidade": utilidade,
-                "Comentário": comentario,
-            }
-        )
-
