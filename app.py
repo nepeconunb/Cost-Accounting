@@ -246,15 +246,17 @@ def inventario_produtos():
 # ========================================================
 # TABS PRINCIPAIS
 # ========================================================
-tab_home, tab_simulador, tab_classificacao, tab_markup, tab_inventario = st.tabs(
+
+tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs(
     [
-        "🏠 Página inicial",
-        "💻 Simulador de Gastos e Custos",
-        "📚 Classificação de Gastos",
-        "🧾 Mark-up de Preço",
-        "📦 Livro de Inventário",
+        "🏠 Página inicial",                 # 1ª aba
+        "📚 Classificação de Gastos",        # 2ª aba
+        "📦 Livro de Inventário",            # 3ª aba
+        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
+        "🧾 Mark-up de Preço",               # 5ª aba
     ]
 )
+
 
 # ========================================================
 # TAB 0 – PÁGINA INICIAL
