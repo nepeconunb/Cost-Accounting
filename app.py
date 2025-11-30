@@ -1317,9 +1317,18 @@ with tab_avaliacao:
         facilidade = st.slider("Facilidade de uso da interface", 1, 10, 9)
         utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
 
-        palavra_labcost_bruta = st.text_input(
-            "Em **uma palavra**, como você define o LABCOST?"
-        )
+        palavra_labcost = st.selectbox(
+    "Como você define o LABCOST?",
+    [
+        "Excelente",
+        "Ótimo",
+        "Bom",
+        "Regular",
+        "Confuso",
+        "Difícil"
+    ]
+)
+
 
         enviar = st.form_submit_button("Enviar avaliação")
 
