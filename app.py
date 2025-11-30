@@ -1380,21 +1380,19 @@ with tab_avaliacao:
             with col3:
                 st.metric("Média – Utilidade", f"{media_utilidade:.1f}")
 
-        # ---------------- TIPO DE USUÁRIO ----------------
+               # ---------------- TIPO DE USUÁRIO ----------------
         if "Tipo de usuário" in df_av.columns:
             st.markdown("#### Quem está usando o LABCOST?")
+
+            # conta quantos de cada tipo e já organiza as colunas
             dist_tipo = (
                 df_av["Tipo de usuário"]
                 .value_counts()
-                .reset_index()
-                .rename(
-                    columns={
-                        "index": "Tipo de usuário",
-                        "Tipo de usuário": "Quantidade",
-                    }
-                )
+                .rename_axis("Tipo de usuário")   # nome da coluna de índice
+                .reset_index(name="Quantidade")   # transforma em DataFrame
+                .set_index("Tipo de usuário")     # usa essa coluna como índice
             )
-            dist_tipo = dist_tipo.set_index("Tipo de usuário")
+
             st.bar_chart(dist_tipo)
 
         # ---------------- CIDADE / ESTADO ----------------
