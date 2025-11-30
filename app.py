@@ -11,6 +11,10 @@ st.set_page_config(
     page_icon="📊",
     layout="wide",
 )
+# ---------------- CONTADOR DE VISITAS (POR SESSÃO) ----------------
+if "visitas" not in st.session_state:
+    st.session_state["visitas"] = 0
+st.session_state["visitas"] += 1
 
 # ========================================================
 # FUNÇÕES AUXILIARES – INVENTÁRIO
@@ -385,6 +389,7 @@ tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs
         "📦 Livro de Inventário",            # 3ª aba
         "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
         "🧾 Mark-up de Preço",               # 5ª aba
+        "⭐ Avaliação do LABCOST",
     ]
 )
 
@@ -488,7 +493,7 @@ with tab_home:
         "O LABCOST é uma ferramenta educacional desenvolvida no âmbito do NEPECON/UnB "
         "para apoiar o ensino de Contabilidade de Custos e Gestão."
     )
-
+st.metric("Visitas nesta sessão", st.session_state["visitas"])
 # ========================================================
 # TAB – SIMULADOR DE GASTOS E CUSTOS
 # ========================================================
