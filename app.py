@@ -195,17 +195,20 @@ def inventario_produtos():
         resultados_meses.append((mes, df_res))
 
         st.markdown(f"#### ✅ Resultado – Mês {mes}")
+
+        # dicionário de formatação (sem CTu utilizado quando não for média)
+        format_dict = {
+            "Estoque inicial (CTu)": "R$ {:,.2f}",
+            "Produção (CTu)": "R$ {:,.2f}",
+            "Preço de venda (R$)": "R$ {:,.2f}",
+            "CMV (R$)": "R$ {:,.2f}",
+            "Estoque final (R$)": "R$ {:,.2f}",
+        }
+        if metodo.lower().startswith("média"):
+            format_dict["CTu utilizado (método)"] = "R$ {:,.2f}"
+
         st.dataframe(
-            df_res.style.format(
-                {
-                    "Estoque inicial (CTu)": "R$ {:,.2f}",
-                    "Produção (CTu)": "R$ {:,.2f}",
-                    "Preço de venda (R$)": "R$ {:,.2f}",
-                    "CTu utilizado (método)": "R$ {:,.2f}",
-                    "CMV (R$)": "R$ {:,.2f}",
-                    "Estoque final (R$)": "R$ {:,.2f}",
-                }
-            ),
+            df_res.style.format(format_dict),
             use_container_width=True,
         )
 
@@ -246,7 +249,6 @@ def inventario_produtos():
 # ========================================================
 # TABS PRINCIPAIS
 # ========================================================
-
 tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs(
     [
         "🏠 Página inicial",                 # 1ª aba
@@ -256,7 +258,6 @@ tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs
         "🧾 Mark-up de Preço",               # 5ª aba
     ]
 )
-
 
 # ========================================================
 # TAB 0 – PÁGINA INICIAL
@@ -1130,3 +1131,4 @@ with tab_markup:
 # ========================================================
 with tab_inventario:
     inventario_produtos()
+
