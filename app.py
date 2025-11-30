@@ -11,15 +11,16 @@ st.set_page_config(
 )
 
 # ---------------- TABS PRINCIPAIS ----------------
-tab_home, tab_simulador, tab_classificacao, tab_markup = st.tabs(
+tab_home, tab_simulador, tab_classificacao, tab_markup, tab_inventario = st.tabs(
     [
         "🏠 Página inicial",
         "💻 Simulador de Gastos e Custos",
         "📚 Classificação de Gastos",
-        "🧾 Mark-up de Preço"
-        "inventario_produtos"
+        "🧾 Mark-up de Preço",
+        "📦 Livro de Inventário"
     ]
 )
+
 
 # =========================================================
 # TAB 0 – PÁGINA INICIAL
@@ -1019,4 +1020,9 @@ def inventario_produtos():
             "Valor total do estoque final (R$)",
             f"{total_estoque_final:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
         )
+# =========================================================
+# TAB 4 – LIVRO DE INVENTÁRIO
+# =========================================================
+with tab_inventario:
+    inventario_produtos()
 
