@@ -414,7 +414,7 @@ with tab_home:
         st.title("Bem-vindo ao LABCOST")
         st.markdown(
             """
-            **LABCOST – Laboratório de Simulação de Gastos e Custos**  
+            **LABCOST – Laboratório de Simulação de Custo-Volume-Lucro**  
 
             Este simulador é utilizado na disciplina de **Contabilidade de Custos**,
             ministrada pela Profª **Fátima de Souza Freire** na **Universidade de Brasília (UnB)**,
