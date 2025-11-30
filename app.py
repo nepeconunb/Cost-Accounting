@@ -380,11 +380,12 @@ def inventario_produtos():
 # ========================================================
 tab_home, tab_classificacao, tab_inventario, tab_simulador, tab_markup = st.tabs(
     [
-        "🏠 Página inicial",                 # 1ª aba
-        "📚 Classificação de Gastos",        # 2ª aba
-        "📦 Livro de Inventário",            # 3ª aba
-        "💻 Simulador de Gastos e Custos",   # 4ª aba (Produto único + Mix)
-        "🧾 Mark-up de Preço",               # 5ª aba
+        "🏠 Página inicial",
+        "📚 Classificação de Gastos",
+        "📦 Livro de Inventário",
+        "💻 Simulador de Gastos e Custos",
+        "🧾 Mark-up de Preço",
+        "⭐ Avaliação do LABCOST",
     ]
 )
 
