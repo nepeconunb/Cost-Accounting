@@ -1290,6 +1290,12 @@ with tab_avaliacao:
     # ---------------- FORMULÁRIO DE AVALIAÇÃO ----------------
     with st.form("form_avaliacao"):
 
+        col_a, col_b = st.columns(2)
+        with col_a:
+            cidade = st.text_input("Cidade")
+        with col_b:
+            estado = st.text_input("Estado")
+
         tipo_usuario = st.selectbox(
             "Você é:",
             [
@@ -1305,19 +1311,19 @@ with tab_avaliacao:
         utilidade = st.slider("Utilidade para aprendizagem de custos", 1, 10, 10)
 
         palavra = st.text_input(
-            "Em **uma palavra**, como você descreve o LABCOST? "
-            "(ex.: *didático*, *útil*, *complexo*...)"
+            "Em **uma palavra**, como você descreve o LABCOST?"
         )
 
         enviar = st.form_submit_button("Enviar avaliação")
 
-    # ---- TRATAMENTO DO ENVIO (fora do with st.form, mas ainda dentro da aba) ----
+    # ---- TRATAMENTO DO ENVIO ----
     if enviar:
-        # Normaliza a palavra (opcional: tira espaços extras)
-        palavra_limpa = palavra.strip()
+        palavra_limpa = palavra.strip().lower()
 
-        # Monta o registro da resposta (sem nome, e-mail, cidade, estado)
+        # Monta o registro da resposta
         resposta = {
+            "Cidade": cidade,
+            "Estado": estado,
             "Tipo de usuário": tipo_usuario,
             "Nota geral": nota_geral,
             "Facilidade": facilidade,
@@ -1335,11 +1341,11 @@ with tab_avaliacao:
         else:
             df_novo = pd.DataFrame([resposta])
 
-        # Salva (sobrescreve com o conjunto atualizado)
+        # Salva o CSV
         df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
         st.success("Obrigado pela sua avaliação! 🙌")
-        st.write("### Resumo da sua resposta (anônima):")
+        st.write("### Resumo da sua resposta:")
         st.write(resposta)
 
     st.markdown("---")
@@ -1350,25 +1356,18 @@ with tab_avaliacao:
     if csv_path.exists():
         df_av = pd.read_csv(csv_path)
 
-        # Mostra quantidade total
         st.write(f"Total de avaliações respondidas: **{len(df_av)}**")
 
-        # Calcula médias das notas, se as colunas existirem
+        # --- Médias das notas ---
         col1, col2, col3 = st.columns(3)
         if "Nota geral" in df_av.columns:
-            media_geral = df_av["Nota geral"].mean()
-            with col1:
-                st.metric("Média – Nota geral", f"{media_geral:.1f}")
+            col1.metric("Média – Nota geral", f"{df_av['Nota geral'].mean():.1f}")
         if "Facilidade" in df_av.columns:
-            media_facilidade = df_av["Facilidade"].mean()
-            with col2:
-                st.metric("Média – Facilidade", f"{media_facilidade:.1f}")
+            col2.metric("Média – Facilidade", f"{df_av['Facilidade'].mean():.1f}")
         if "Utilidade" in df_av.columns:
-            media_utilidade = df_av["Utilidade"].mean()
-            with col3:
-                st.metric("Média – Utilidade", f"{media_utilidade:.1f}")
+            col3.metric("Média – Utilidade", f"{df_av['Utilidade'].mean():.1f}")
 
-        # Distribuição por tipo de usuário
+        # --- Quem usa o LABCOST ---
         if "Tipo de usuário" in df_av.columns:
             st.markdown("#### Quem está usando o LABCOST?")
             dist_tipo = (
@@ -1378,39 +1377,42 @@ with tab_avaliacao:
                 .reset_index(name="Quantidade")
             )
             dist_tipo.columns = ["Tipo de usuário", "Quantidade"]
-            dist_tipo = dist_tipo.set_index("Tipo de usuário")
-            st.bar_chart(dist_tipo)
+            st.bar_chart(dist_tipo.set_index("Tipo de usuário"))
 
-        # "Nuvem de palavras" simples a partir de Palavra_LABCOST
+        # --- Distribuição geográfica ---
+        if "Cidade" in df_av.columns and "Estado" in df_av.columns:
+            st.markdown("#### 🌍 Onde estão os usuários?")
+            df_geo = df_av.groupby(["Estado", "Cidade"]).size().reset_index(name="Qtd")
+            st.dataframe(df_geo, use_container_width=True)
+
+        # --- Nuvem de palavras (simples) ---
         if "Palavra_LABCOST" in df_av.columns:
-            st.markdown("#### ☁️ Nuvem de palavras – uma palavra sobre o LABCOST")
+            st.markdown("#### ☁️ Nuvem de palavras")
 
-            # Contagem das palavras (maiúsculas/minúsculas normalizadas)
-            serie_palavras = (
+            palavras = (
                 df_av["Palavra_LABCOST"]
                 .astype(str)
                 .str.strip()
                 .str.lower()
             )
+
             contagem = (
-                serie_palavras[serie_palavras != ""]
+                palavras[palavras != ""]
                 .value_counts()
                 .reset_index(name="Frequência")
             )
-            contagem.columns = ["palavra", "Frequência"]
+            contagem.columns = ["Palavra", "Frequência"]
 
             if not contagem.empty:
-                # Mostra como gráfico de barras (tipo "nuvem" simplificada)
-                st.bar_chart(
-                    contagem.set_index("palavra")
-                )
-
-                # Também exibe tabela
-                st.dataframe(contagem, use_container_width=True)
+                st.bar_chart(contagem.set_index("Palavra"))
             else:
-                st.info("Ainda não há palavras registradas nas avaliações.")
+                st.info("Ainda não há palavras registradas.")
 
-        # (Opcional) botão para baixar o CSV
+        # --- Tabela completa ---
+        st.markdown("#### 📄 Tabela completa de avaliações")
+        st.dataframe(df_av, use_container_width=True)
+
+        # --- Download ---
         with open(csv_path, "rb") as f:
             st.download_button(
                 label="📥 Baixar avaliações em CSV",
@@ -1419,8 +1421,5 @@ with tab_avaliacao:
                 mime="text/csv",
             )
     else:
-        st.info(
-            "Ainda não há avaliações salvas. Assim que a primeira for enviada, "
-            "o resumo aparecerá aqui."
-        )
+        st.info("Ainda não há avaliações salvas.")
 
