@@ -1311,20 +1311,39 @@ with tab_avaliacao:
 
         enviar = st.form_submit_button("Enviar avaliação")
 
-    if enviar:
+        if enviar:
+        # Monta o registro da resposta
+        resposta = {
+            "Nome": nome,
+            "E-mail": email,
+            "Cidade": cidade,
+            "Estado": estado,
+            "Tipo de usuário": tipo_usuario,
+            "Nota geral": nota_geral,
+            "Facilidade": facilidade,
+            "Utilidade": utilidade,
+            "Comentário": comentario,
+        }
+
+        # Caminho do arquivo CSV
+        csv_path = Path("avaliacoes_labcost.csv")
+
+        # Se já existir, carrega e acrescenta; senão, cria novo
+        if csv_path.exists():
+            df_existente = pd.read_csv(csv_path)
+            df_novo = pd.concat([df_existente, pd.DataFrame([resposta])], ignore_index=True)
+        else:
+            df_novo = pd.DataFrame([resposta])
+
+        # Salva (sobrescreve com o conjunto atualizado)
+        df_novo.to_csv(csv_path, index=False, encoding="utf-8-sig")
+
         st.success("Obrigado pela sua avaliação! 🙌")
         st.write("### Resumo da sua resposta:")
-        st.write(
-            {
-                "Nome": nome,
-                "E-mail": email,
-                "Cidade": cidade,
-                "Estado": estado,
-                "Tipo de usuário": tipo_usuario,
-                "Nota geral": nota_geral,
-                "Facilidade": facilidade,
-                "Utilidade": utilidade,
-                "Comentário": comentario,
-            }
+        st.write(resposta)
+
+        st.info(
+            "As avaliações estão sendo salvas no arquivo **avaliacoes_labcost.csv** "
+            "na pasta do aplicativo."
         )
 
