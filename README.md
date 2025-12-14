@@ -66,9 +66,6 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 
 *(As imagens devem ser adicionadas na pasta `/images` do repositório)*
 
-
-### 👉 Passo 2 — APAGAR SOMENTE ESTA LINHA 👇
-
 ```html
 <!--
 <img src="images/labcost_preview1.png" width="600">
