@@ -1,6 +1,3 @@
-# 🧮 LABCOST – Simulador de Gastos e Custos  
-### *Learning and Business Cost Simulator*
-
 ---
 
 # 🧮 LABCOST – Simulador de Gastos e Custos
