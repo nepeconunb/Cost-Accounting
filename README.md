@@ -3,6 +3,11 @@
 
 ---
 
+# 🧮 LABCOST – Simulador de Gastos e Custos
+### *Learning and Business Cost Simulator*
+
+---
+
 ## 🇧🇷 Versão em Português
 
 ## Sobre o LABCOST
@@ -64,10 +69,16 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 
 ## Capturas de Tela
 
-*(As imagens devem ser adicionadas na pasta `/images` do repositório)*
+As imagens ilustrativas do simulador devem ser adicionadas na pasta `/images` do repositório.  
+Quando disponíveis, podem ser inseridas diretamente no README.
 
-```html
-<!--
-<img src="images/labcost_preview1.png" width="600">
-<img src="images/labcost_preview2.png" width="600">
--->
+---
+
+## Instalação e Execução Local
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/nepeconunb/Cost-Accounting.git
+cd Cost-Accounting
+
