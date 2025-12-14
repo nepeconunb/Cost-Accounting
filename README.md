@@ -65,6 +65,9 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 *(Adicionar as imagens na pasta `/images` do repositório)*
 
 ```html
+<!--
 <img src="images/labcost_preview1.png" width="600">
 <img src="images/labcost_preview2.png" width="600">
+-->
+
 
