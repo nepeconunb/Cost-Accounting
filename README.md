@@ -69,5 +69,9 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 
 ### 👉 Passo 2 — APAGAR SOMENTE ESTA LINHA 👇
 
-```text
+```html
+<!--
+<img src="images/labcost_preview1.png" width="600">
+<img src="images/labcost_preview2.png" width="600">
+-->
 Atualiza README com descrição acadêmica, impacto educacional e citação ABNT
