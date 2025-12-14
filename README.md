@@ -66,9 +66,8 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 
 *(As imagens devem ser adicionadas na pasta `/images` do repositório)*
 
-```html
-<!--
-<img src="images/labcost_preview1.png" width="600">
-<img src="images/labcost_preview2.png" width="600">
--->
+
+### 👉 Passo 2 — APAGAR SOMENTE ESTA LINHA 👇
+
+```text
 Atualiza README com descrição acadêmica, impacto educacional e citação ABNT
