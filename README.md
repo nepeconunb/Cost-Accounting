@@ -1,7 +1,11 @@
 ---
 
 # 🧮 LABCOST – Simulador de Gastos e Custos
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17933077.svg)](https://doi.org/10.5281/zenodo.17933077)
+
 ### *Learning and Business Cost Simulator*
+
 
 ---
 
@@ -78,4 +82,9 @@ Quando disponíveis, podem ser inseridas diretamente no README.
 ```bash
 git clone https://github.com/nepeconunb/Cost-Accounting.git
 cd Cost-Accounting
+---
+
+## 📌 Citação
+
+Freire, F. S. (2025). *LABCOST – Simulador de Gastos e Custos (Versão Educacional)* (v.1.0.1) [Software]. Universidade de Brasília – NEPECON. https://doi.org/10.5281/zenodo.17933077
 
