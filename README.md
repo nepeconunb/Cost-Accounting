@@ -31,8 +31,6 @@ O LABCOST pode ser utilizado em disciplinas de **graduação**, **pós-graduaç�
 
 ---
 
----
-
 ## 🏛 Instituição e Projeto
 
 O LABCOST é um produto educacional vinculado ao **NEPECON – Núcleo de Estudos e Pesquisas em Contabilidade e Sustentabilidade Econômica e Socioambiental**, do **Departamento de Ciências Contábeis e Atuariais da Universidade de Brasília (UnB)**.
@@ -104,5 +102,3 @@ cd Cost-Accounting
 Freire, F. S. (2025). *LABCOST – Simulador de Gastos e Custos (Versão Educacional)* (v.1.0.1) [Software].  
 Universidade de Brasília – NEPECON.  
 https://doi.org/10.5281/zenodo.17933077
-
-
