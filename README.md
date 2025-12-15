@@ -81,11 +81,16 @@ A funcionalidade inclui **correção automática** e **feedback imediato**, refo
 
 ---
 
+## 📌 Como citar
+
+Freire, F. S. (2025). *LABCOST – Simulador de Gastos e Custos (Versão Educacional)* (v.1.0.1) [Software].  
+Universidade de Brasília – NEPECON.  
+https://doi.org/10.5281/zenodo.17933077
+---
+
 ## 🖼️ Capturas de Tela
 
-As imagens ilustrativas do simulador podem ser adicionadas na pasta `/images` do repositório.  
-Quando disponíveis, podem ser inseridas diretamente neste README utilizando Markdown.
-
+As imagens ilustrativas do simulador poderão ser adicionadas futuramente à pasta `/images` do repositório, para fins de documentação visual e apoio didático.
 ---
 
 ## 💻 Instalação e Execução Local
@@ -96,10 +101,4 @@ Quando disponíveis, podem ser inseridas diretamente neste README utilizando Mar
 git clone https://github.com/nepeconunb/Cost-Accounting.git
 cd Cost-Accounting
 
----
 
-## 📌 Como citar
-
-Freire, F. S. (2025). *LABCOST – Simulador de Gastos e Custos (Versão Educacional)* (v.1.0.1) [Software].  
-Universidade de Brasília – NEPECON.  
-https://doi.org/10.5281/zenodo.17933077
