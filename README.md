@@ -5,6 +5,8 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-Educational_App-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Stable-success)
+🔗 **Acesso online (Streamlit App):**  
+👉 https://labcost.streamlit.app/
 
 ### *Learning and Business Cost Simulator*
 
