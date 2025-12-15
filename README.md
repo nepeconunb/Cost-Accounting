@@ -31,6 +31,13 @@ O LABCOST pode ser utilizado em disciplinas de **graduação**, **pós-graduaç�
 
 ---
 
+---
+
+## 🏛 Instituição e Projeto
+
+O LABCOST é um produto educacional vinculado ao **NEPECON – Núcleo de Estudos e Pesquisas em Contabilidade e Sustentabilidade Econômica e Socioambiental**, do **Departamento de Ciências Contábeis e Atuariais da Universidade de Brasília (UnB)**.
+
+
 ## ⚙️ Funcionalidades
 
 ### 🔹 Produto Único
