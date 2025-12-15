@@ -89,4 +89,13 @@ Quando disponíveis, podem ser inseridas diretamente neste README utilizando Mar
 git clone https://github.com/nepeconunb/Cost-Accounting.git
 cd Cost-Accounting
 
+@software{freire_labcost_2025,
+  author       = {Freire, Fátima de Souza},
+  title        = {LABCOST – Simulador de Gastos e Custos (Versão Educacional)},
+  year         = {2025},
+  version      = {1.0.1},
+  publisher    = {Universidade de Brasília – NEPECON},
+  doi          = {10.5281/zenodo.17933077},
+  url          = {https://doi.org/10.5281/zenodo.17933077}
+}
 
