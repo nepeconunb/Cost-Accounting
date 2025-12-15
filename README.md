@@ -1,11 +1,8 @@
----
-
 # 🧮 LABCOST – Simulador de Gastos e Custos
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17933077.svg)](https://doi.org/10.5281/zenodo.17933077)
 
 ### *Learning and Business Cost Simulator*
-
 
 ---
 
