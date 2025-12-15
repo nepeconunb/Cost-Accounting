@@ -89,5 +89,4 @@ Quando disponíveis, podem ser inseridas diretamente neste README utilizando Mar
 git clone https://github.com/nepeconunb/Cost-Accounting.git
 cd Cost-Accounting
 
-Fix README installation section formatting
 
