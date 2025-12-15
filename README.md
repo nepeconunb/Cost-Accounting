@@ -88,4 +88,11 @@ Quando disponíveis, podem ser inseridas diretamente neste README utilizando Mar
 ```bash
 git clone https://github.com/nepeconunb/Cost-Accounting.git
 cd Cost-Accounting
+### 2️⃣ Criar ambiente virtual (opcional, recomendado)
+
+```bash
+python -m venv venv
+source venv/bin/activate
+venv\Scripts\activate
+pip install -r requirements.txt
 
